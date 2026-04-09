@@ -35,3 +35,7 @@ trigger: 任務完成 | git commit | session 結束 → 追加一行摘要（格
 ## Session 長度提醒
 trigger: assistant turns 超過 30 次（目測對話已經很長）
 action: 提醒用戶「這個 session 已經很長了，建議 /交接 + /clear 開新 session，避免 context 膨脹推高 Opus 成本」。只提醒一次。
+
+## 核心 Skills 同步提醒
+trigger: 修改了以下任一 skill 並 commit：分配、dp、debug-buygo、deploy、token-report、ssc、tdd
+action: 提醒「💡 核心 skill 已更新，要同步到 claude-config/skills-snapshot/ 嗎？」。用戶說好 → 執行 `cp -r Development/.claude/skills/<skill名> ~/.claude/skills-snapshot/` → commit + push claude-config repo。
