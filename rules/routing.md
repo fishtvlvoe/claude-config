@@ -18,11 +18,23 @@ Claude（專案經理）→ 企劃、規劃、拆任務、驗證、整合結果
 
 ---
 
+## ⛔ 動手前強制 Gate（每次，不允許跳過，無例外）
+
+收到任務後，**包含 bug fix**，強制走以下順序：
+1. 派 Copilot CLI 寫測試（重現問題或定義成功標準）→ 確認紅燈
+2. 派 Copilot CLI / Codex CLI / cursor-agent 寫代碼（依任務性質選擇）→ 確認綠燈
+3. Kimi CR
+4. 才回報 Fish
+
+**唯一例外：** 真正的 1 行 hotfix（改一個值/字串），必須明確說「這是 1 行 hotfix，原因是 X」才能直接做。
+
+---
+
 ## ⛔ 動手前強制自問（每次，不允許跳過）
 
 收到任務後，**寫任何程式碼或工具呼叫之前**，必須先在腦中過這四題：
 
-1. **超過 5 行程式碼？** → YES → 派 cursor-agent Skill 或 Sonnet 子代理，我不寫
+1. **超過 5 行程式碼？** → YES → 依任務性質選擇：Copilot CLI / Codex CLI / cursor-agent（見核心路由），我不寫
 2. **需要讀 3+ 個檔案？** → YES → 派 Kimi MCP，我只看摘要
 3. **需要查外部技術/API/文件？** → YES → `gemini -p "..."` CLI，不用 Claude
 4. **寫文件/HTML/scaffold？** → YES → cursor-agent Skill，零 Anthropic token
@@ -30,6 +42,7 @@ Claude（專案經理）→ 企劃、規劃、拆任務、驗證、整合結果
 全部 NO → 才允許主對話直接執行。
 
 5. **串接外部 API（fal.ai / OpenAI / ElevenLabs...）？** → YES → 先用 `gemini -p` 查最新端點格式，再派 Sonnet 實作。禁止憑記憶假設 URL / payload 格式。
+6. **說某個工具「不能用」或「沒有」之前？** → 必須先執行 `which <tool>` 確認。已知可用工具：`copilot`（GitHub Copilot CLI）、`codex`（Codex CLI）、`gemini`（Gemini CLI）、`cursor`（Cursor CLI）。禁止憑記憶說不能用。
 
 ---
 
@@ -62,33 +75,68 @@ Copilot Copilot Kimi  Gemini cursor
 
 ## 模型分工表
 
-<!-- 呼叫方式：Opus=主對話 / Sonnet/Haiku=Agent / Kimi=`kimi --yolo --print` / Gemini=`gemini -p` / Codex=`codex exec` / cursor-agent=`cursor-agent -f --print` / Copilot=`copilot -p --allow-all-tools --model <id>` -->
+<!-- 呼叫方式：
+  Opus=主對話
+  Sonnet/Haiku=Agent
+  Kimi=`kimi --yolo --print`
+  Gemini=`gemini -p`
+  Codex=`codex exec "prompt"` （非互動，有讀檔/改檔/shell 能力）
+  cursor-agent=cursor-agent Skill
+  Copilot=`copilot -p "prompt" --yolo --model <id>` （非互動，--yolo = allow-all）
+-->
 
-| 層級 | 模型 | 用於 |
-|------|------|------|
-| **大腦** | Opus / Sonnet | 規劃、WBS 拆解、決策、整合結果（唯一消耗 Anthropic token 的層） |
-| **Primary 執行** | Copilot (gpt-5.2-codex) | 寫程式碼、重構、測試撰寫（零 Anthropic token） |
-| **Primary 執行** | Copilot (claude-opus-4.6) | 複雜邏輯實作、需要高推理的任務（零 Anthropic token） |
-| **Primary 執行** | Copilot (gpt-5.4 / gpt-4.1) | 文件撰寫、scaffold、輕量任務（零 Anthropic token） |
-| **Primary 執行** | Kimi | 3+ 檔案分析、架構理解、大量 diff review |
-| **Primary 執行** | Gemini | 研究外部 API/技術、搜尋網路資料 |
-| **Primary 執行** | cursor-agent | 本機偵察、HTML UI 原型（零 Anthropic token） |
-| **Primary 執行** | Codex | 安全驗證、交叉 review |
-| **Fallback 執行** | Sonnet 子代理 | Primary 額度滿 / 失敗時，接手程式碼撰寫 |
-| **Fallback 執行** | Haiku 子代理 | Primary 額度滿 / 失敗時，接手雜務、格式、讀檔 |
+| 層級 | 模型 | 用於 | 呼叫方式 |
+|------|------|------|---------|
+| **大腦** | Opus / Sonnet | 規劃、WBS 拆解、決策、整合結果（唯一消耗 Anthropic token 的層） | 主對話 |
+| **Primary 執行** | Copilot CLI (gpt-5.2-codex) | 核心業務邏輯、API routes、測試撰寫 | `copilot -p "..." --yolo --model gpt-5.2` |
+| **Primary 執行** | Copilot CLI (claude-opus-4.6) | 複雜邏輯實作、需要高推理的任務 | `copilot -p "..." --yolo --model claude-opus-4.6` |
+| **Primary 執行** | Copilot CLI (gpt-4.1) | 文件撰寫、scaffold、輕量程式碼 | `copilot -p "..." --yolo --model gpt-4.1` |
+| **Primary 執行** | Codex CLI | 有 shell 執行需求的寫碼任務、需要跑測試確認的實作、本機 git 操作 | `codex exec "prompt"` |
+| **Primary 執行** | cursor-agent | 本機偵察、HTML UI 原型、簡單檔案操作 | cursor-agent Skill |
+| **Primary 執行** | Kimi | 3+ 檔案分析、架構理解、大量 diff review | MCP |
+| **Primary 執行** | Gemini | 研究外部 API/技術、搜尋網路資料 | `gemini -p "..."` |
+| **Fallback 執行** | Sonnet 子代理 | Primary 全部失敗、或任務需要 Anthropic context 整合 | Agent tool |
+| **Fallback 執行** | Haiku 子代理 | Primary 額度滿 / 失敗時，接手雜務、格式、讀檔 | Agent tool |
 
 ## 核心路由
 
 - 任務拆解、方案選擇、風險評估 → 主對話（Opus），用 WBS + MECE
 - 3+ 檔案分析 / 架構 / review / 50+ 行 diff → Kimi（Primary）
-- 寫程式碼（有規格）→ Copilot gpt-5.2-codex（Primary）→ Sonnet（Fallback）
+- 寫程式碼（有規格）→ 四層選擇（不需用戶確認，自行判斷）：
+  - **Copilot CLI gpt-5.2-codex**：核心業務邏輯、API routes、測試撰寫（零 token）→ `copilot -p "..." --yolo --model gpt-5.2`
+  - **Codex CLI**：需要跑 shell / 測試確認的實作、本機 git 操作、有 sandbox 需求的任務 → `codex exec "..."`
+  - **cursor-agent**：UI 元件、scaffold、簡單本機檔案操作（零 token）
+  - **Sonnet 子代理**：複雜推理、需要 Anthropic context 整合、以上全部失敗 fallback
 - 研究外部技術 / API 文件 / 網路資料 → `gemini -p "prompt"`（Primary）
-- 關鍵邏輯驗證 / 安全 review → `codex exec "prompt"`
-- 文件撰寫 / HTML UI / 本機偵察 → cursor-agent 或 Copilot gpt-4.1（零 token）
-- 搜尋、讀檔、紀錄、格式調整 → Copilot claude-haiku（Primary）→ Haiku（Fallback）
+- 安全驗證 / 交叉 review → `codex exec review` 或 `codex exec "review this..."`
+- 文件撰寫 / HTML UI / 本機偵察 → cursor-agent 或 `copilot -p "..." --yolo --model gpt-4.1`
+- 搜尋、讀檔、紀錄、格式調整 → `copilot -p "..." --yolo --model claude-haiku`（Primary）→ Haiku 子代理（Fallback）
 - 小改動（1-2 行 hotfix）→ 主對話直接做（唯一例外）
 - PR 建立後 → GitHub Copilot 自動 review（訂閱內，不消耗 Claude token）
 - 正式開發 → /sla:develop 或 /sla:plan；專案啟動 → /gsd:plan-phase
+
+## 代碼回收後的審核流程（強制，每次）
+
+代理交回代碼後，必須走以下三層：
+
+**Layer 1 — CR（Kimi）**
+- 觸發：任何代理交回 diff 超過 10 行
+- 指令：`kimi --yolo --print "review this diff: [檔案清單]"`
+- 確認：邏輯正確、無冗餘、符合現有架構
+- 不通過 → 打回重寫，說明原因
+
+**Layer 2 — Debug（Sonnet 子代理 或 主對話）**
+- 觸發：CR 發現問題 OR 測試跑不過
+- 流程：讀 error → 找根因 → 派對應代理修 → 重跑測試
+- 禁止：連續 retry 同一個錯誤超過 2 次不換策略
+
+**Layer 3 — Coverage（Copilot 或 cursor-agent）**
+- 觸發：每個 Phase 完成後
+- 工作：確認新增的函數都有對應測試，執行 `npx jest --coverage`
+- 標準：核心業務邏輯覆蓋率 > 80%
+- 回報格式：通過 N / 失敗 N / 覆蓋率 N%
+
+---
 
 ## Fallback 觸發條件
 
