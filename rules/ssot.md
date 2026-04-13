@@ -14,6 +14,10 @@
 | 工作流規則 | `~/.claude/CLAUDE.md` → `rules/` | memory 檔案（規則不是記憶） |
 | Skill 開發紀錄 | 各 Skill 的 `SKILL.md` | memory 檔案 |
 | 跨日記憶/搜尋 | claude-mem | today.md（today 隔天清空） |
+| Flow 定義 | `mesh/flow.yaml` | rules/ 檔案（具體 flow 見 mesh/flow.yaml） |
+| 失敗類型定義 | `mesh/failure-types.md` | 其他 memory 檔案 |
+| 任務歷史 | `memory/task-history/` | 其他位置 |
+| 失敗模式 | `memory/failure-patterns/` | 其他位置 |
 
 policy: 寫任何資訊前，先查 SSOT 表確認歸屬，寫錯地方 = 違規
 policy: 發現同一資訊出現在兩處 → 保留 SSOT 歸屬的那份，刪除另一份

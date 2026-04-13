@@ -1,0 +1,113 @@
+name: mesh-flow-system
+description: 完整的任務執行 Flow，包含規劃、實作、驗證、回退邏輯
+
+flow:
+  - step: discuss
+    agent: main
+    skip_if: requirements_clear
+    output:
+      - acceptance_criteria[]
+    description: 澄清需求、定義成功標準
+    memory:
+      read: [failure-patterns]
+
+  - step: propose
+    agent: main
+    output:
+      - spec
+      - tasks[]
+    description: 拆解任務、產生規劃文件
+    memory:
+      read: [task-history]
+
+  - step: build
+    agents: [copilot-codex, cursor-agent, codex-cli]
+    output:
+      - code
+      - tests
+      - commits[]
+    description: 實作、測試、version control
+    memory:
+      read: [failure_history]
+
+  - step: format_check
+    agent: haiku
+    output:
+      - format_valid: boolean
+      - violations[]
+    on_fail: build
+    description: 檢查代碼格式、commit message、殘留 TODO
+
+  - step: review
+    agents: [kimi, codex, github-copilot]
+    output:
+      - verdict: pass | fail
+      - failure_type: fail_apply | fail_proposal | fail_discuss
+      - reason: string
+    description: 三層 review（diff、安全、整體）
+    memory:
+      read: []
+
+  - step: memory_write
+    agent: haiku
+    always_run: true
+    output:
+      - task_history_record
+      - failure_pattern_update
+    description: 寫入任務歷史、更新失敗模式
+    memory:
+      write:
+        - task_history: "~/.claude/memory/task-history/{date}-{slug}.json (pass 或 fail 都寫)"
+        - failure_patterns: "~/.claude/memory/failure-patterns/{category}.json (fail 時更新 pattern)"
+
+# Memory Read/Write 詳細邏輯
+memory_operations:
+  discuss:
+    read:
+      - source: "~/.claude/memory/failure-patterns/{category}.json"
+      - action: "列出該類任務最常見的 3-5 個失敗 pattern（by occurrence_count 排序）"
+      - purpose: "讓 planner 提前知道該類任務容易踩的坑"
+
+  propose:
+    read:
+      - source: "~/.claude/memory/task-history/ (same category)"
+      - action: "搜尋過去相似的任務拆解方式，展示成功的 task 結構"
+      - purpose: "參考過去的經驗，避免重新發明輪子"
+
+  build:
+    read:
+      - source: "~/.claude/memory/task-history/{category}.json failure_history"
+      - action: "當代碼執行失敗時，檢查是否符合已知 failure pattern，提示 prevention_tips"
+      - purpose: "快速定位根本原因，避免重複同樣的 bug"
+
+  memory_write:
+    write:
+      - destination: "~/.claude/memory/task-history/{date}-{slug}.json"
+        condition: "always (pass 或 fail)"
+        content: "task_name, user_request, acceptance_criteria[], verdict, iterations, failure_history[], final_result, time"
+
+      - destination: "~/.claude/memory/failure-patterns/{category}.json"
+        condition: "only on fail"
+        action: "(1) 檢查 failure_history 是否符合現有 pattern；(2) 若符合，occurrence_count += 1；(3) 若不符合，新增 pattern；(4) 更新 last_updated"
+
+# 失敗回退邏輯
+failure_routing:
+  fail_apply: build
+  fail_proposal: propose
+  fail_discuss: discuss
+
+# Retry 策略
+retry_policy:
+  max_per_step: 2
+  escalation:
+    fail_apply_twice: fail_proposal
+    fail_proposal_twice: fail_discuss
+    fail_discuss_twice: halt
+
+# Halt 時的通知格式
+halt_notification:
+  include:
+    - task_name
+    - all_failure_attempts
+    - final_failure_type
+    - recommendation

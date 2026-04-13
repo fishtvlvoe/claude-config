@@ -2,21 +2,19 @@
 
 > 代理能力表、寫碼分配、Opus Checklist 見 routing.md。
 
-## 開發 Phase 流程（每個功能/任務都走這個）
+## 開發 Phase 職責定義
 
-**Phase 1 — 規劃**：Opus 與用戶討論決策；cursor-agent 寫 spec.md + tasks.md + HTML UI mockup（零 token）；用戶確認後 commit。
+**Phase 1 — 規劃**：由 Opus 與用戶討論決策；cursor-agent 負責產出 spec.md + tasks.md + HTML UI mockup。
 
-**Phase 2 — TDD 測試**：Sonnet 寫紅燈測試（核心邏輯）；cursor-agent 寫 fixture/stub（零 token）；Kimi review 覆蓋率；commit。
+**Phase 2 — TDD 測試**：撰寫紅燈測試以定義成功條件；建立 fixture/stub；進行覆蓋率審查。
 
-**Phase 3 — 實作（多代理並行）**：Sonnet → 核心架構；cursor-agent → UI/簡單代碼/文案（並行）；Haiku → 更新紀錄（並行）。並行原則：不同檔案可並行，同檔案必須串行。每完成一個任務 → 跑測試 → 紅轉綠 → commit。
+**Phase 3 — 實作**：核心架構、UI 元件、代碼、文案等多層級平行執行。並行原則：不同檔案可並行，同檔案必須串行。
 
-**Phase 4 — Review（三層 CR）**：
-- Layer 1: Kimi → diff 全量 code review（3+ 檔案必用）
-- Layer 2: Codex → 安全邏輯交叉驗證（額度不足時告知用戶跳過）
-- Layer 3: `gh pr create` → GitHub Copilot 自動 review（最終關卡）
-- 發現問題 → Sonnet/cursor-agent 修正 → commit
+**Phase 4 — Review**：三層審查流程確保品質：全量 code review → 安全邏輯驗證 → GitHub Copilot 自動 review。
 
-**Phase 5 — 驗收**：composer test 全綠；Chrome MCP 截圖驗證 UI（如適用）；用戶確認；以 Copilot review 結果作最終驗收依據。
+**Phase 5 — 驗收**：測試全綠、UI 驗證、用戶確認、Copilot review 結果作為最終依據。
+
+具體 flow 見 mesh/flow.yaml。
 
 ## 原則
 
