@@ -241,3 +241,82 @@ Wave 2（後續，依序）:
 👀 多檔案 review/邏輯檢查？ → Kimi
 📚 技術研究/API 文件查詢？ → Gemini
 ```
+
+---
+
+## Spectra Apply 強制 SOP（每次，無例外）
+
+### Wave 開始前（強制三步）
+
+1. 確認前一 Wave 所有任務標記 `[x]`
+2. `git status` 乾淨（前一波 diff 已 commit）
+3. `npm run build`（或對應的 build 指令）通過，0 錯誤
+
+### Wave 執行流程
+
+```
+同一 Wave 的任務 → 同一訊息並行派出（多個 tool call）
+↓
+等所有回傳
+↓
+Kimi MCP CR（diff > 10 行時強制執行）
+↓
+npm run build / npm test
+↓
+git add + commit（conventional commits）
+↓
+才進入下一個 Wave
+```
+
+### 用量不足：主動偵測，不等 Fish 發現（硬規則）
+
+**每個 Wave 派工前，執行用量預檢：**
+```bash
+copilot --version 2>&1 | head -1   # 無回應或錯誤 → 標記不可用
+codex --version 2>&1 | head -1     # 同上
+```
+
+**執行中遇到以下訊號 → 立刻判定用量不足，不 retry 同一 Agent：**
+
+| Agent | 用量不足訊號 |
+|-------|------------|
+| Copilot CLI | `rate limit` / `quota exceeded` / `429` / 無回應 >30s |
+| Kimi MCP/CLI | `context limit` / `session expired` / MCP timeout / `429` |
+| Codex CLI | `quota` / `billing` / 非零 exit + API 錯誤 stderr |
+| Cursor | `ECONNREFUSED` / 無法啟動 |
+
+**自動切換順序（不需 Fish 確認）：**
+
+| 主力 | 第一備用 | 第二備用 |
+|------|---------|---------|
+| Copilot CLI | Kimi CLI | Codex CLI |
+| Kimi CLI | Copilot CLI | Sonnet 子代理 |
+| Codex CLI | Copilot CLI | Bash 直接執行 |
+| Cursor | Copilot CLI (gpt-4.1) | Sonnet 子代理 |
+
+**切換時主動告知 Fish（一句話，不等被問）：**
+```
+⚠️ [Agent X] 用量不足，已切換至 [備用 Y] 繼續執行。
+   任務：[任務編號] [名稱] | 原因：[CLI 錯誤訊息]
+```
+
+**全部備用都失敗 → 停止本 Wave，主動說：**
+```
+⛔ Wave N 暫停：[Agent X/Y/Z] 全部不可用。
+   請確認帳號用量後告知，我繼續從任務 [N.N] 接手。
+```
+
+### 代理產出失敗風控
+
+| 失敗類型 | 判斷 | 處置 |
+|---------|------|------|
+| 代碼錯誤（build 紅燈、runtime error） | build/test 失敗 | 重派一次（更具體 prompt）→ 第二次失敗升規劃問題 |
+| 規劃問題（方向跑偏、缺前置條件） | 代理不斷發問或產出錯誤 | 退回重寫 task prompt，補充前置條件再派 |
+| 同一任務失敗超過 2 次 | — | 停止，主動回報 Fish，等決策 |
+
+### Wave 完成驗收（缺一不過）
+
+- `npm run build` 通過，0 TypeScript 錯誤
+- Kimi MCP CR 無 Critical 問題
+- git commit 存在（禁止「完成但未 commit」）
+- tasks.md 對應任務標記 `[x]`
