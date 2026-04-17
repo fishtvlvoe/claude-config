@@ -53,3 +53,6 @@ memory/
 package.json
 .DS_Store
 _usage.jsonl
+
+# Spectra app data
+.spectra/
