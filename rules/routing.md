@@ -152,7 +152,9 @@ Copilot Copilot Kimi  Gemini cursor
 | **Primary 執行** | Codex CLI | 有 shell 執行需求的寫碼任務、需要跑測試確認的實作、本機 git 操作 | `codex exec "prompt"` |
 | **Primary 執行** | cursor-agent | 本機偵察、HTML UI 原型、簡單檔案操作 | cursor-agent Skill |
 | **Primary 執行** | Kimi K2.6 | 3+ 檔案分析、架構理解、大量 diff CR、**演算法問答、第二意見、多輪追問**、**跨檔重構、需深度理解 codebase 再動手的實作** | MCP：`kimi_analyze`（分析）/ `kimi_query`（純問答）/ `kimi_resume`（接 session）；CLI：`kimi -p "..." --yolo --print -w <dir>`（寫程式） |
-| **Primary 執行** | Gemini | 研究外部 API/技術、搜尋網路資料 | `gemini -p "..."` |
+| **Primary 執行** | Gemini CLI（研究） | 研究外部 API/技術、搜尋網路資料 | `gemini -p "..."` |
+| **Primary 執行** | Gemini CLI（重複執行） | 重複性高的機械工作：爬取腳本批跑、重複生成、腳本循環任務 | `gemini -p "..." --yolo`（腳本循環）走免費 dev 配額 |
+| **Primary 執行** | Gemini Batch API | 大量批量處理（100+ 筆）：Migration 生成、大規模內容分類、非即時文件處理。**比同步 API 便宜 50%** | `python tools/gemini-batch/batch_runner.py --input requests.jsonl` |
 | **Fallback 執行** | Sonnet 子代理 | Primary 全部失敗、或任務需要 Anthropic context 整合 | Agent tool |
 | **Fallback 執行** | Haiku 子代理 | Primary 額度滿 / 失敗時，接手雜務、格式、讀檔 | Agent tool |
 
