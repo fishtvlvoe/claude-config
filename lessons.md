@@ -47,3 +47,4 @@
 | L038 | rsync 部署後 MUST 執行 `find <plugin_dir> -type d -exec chmod 755 {} \; && find <plugin_dir> -type f -exec chmod 644 {} \;` 修正權限，否則靜態資源（CSS/JS）會回 403 | rsync 部署後 |
 
 | L037 | 「取消訂單」需求必須先問清楚：是取消整筆訂單（父訂單 status→cancelled）還是取消訂單內的某個商品行（對應子訂單 cancelChildOrder）。兩者完全不同，不可憑字面假設。 | Spectra propose 需求釐清 |
+| L039 | 每個階段完成後，MUST 主動告知下一步是什麼、需要用戶做什麼決定，不能做完就停在那裡等問。格式：「下一步是 X，需要你 Y，我的判斷是 Z，你要繼續嗎？」 | 任何任務完成後 |
