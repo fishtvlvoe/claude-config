@@ -86,13 +86,13 @@ The Claude assistant MUST declare routing as the first sentence of the response 
 
 - **WHEN** user sends a task involving code changes, bug fixes, or feature additions
 - **THEN** the response SHALL begin with a Spectra routing declaration
-- **AND** TaskCreate/TodoList/Task tools SHALL NOT be used as a substitute
+- **AND** the TaskCreate tool and Task tool SHALL NOT be used as a substitute
 
 #### Scenario: Skippable contexts
 
 - **WHEN** the task is one of: pure Q&A, pure research query, 1-line hotfix (explicitly declared), or system configuration adjustment (launchd/settings/hooks)
-- **THEN** the response MAY skip Spectra routing
-- **AND** the response MUST explicitly state the skip reason: `這不走 Spectra，因為 X`
+- **THEN** the response SHALL be permitted to skip Spectra routing
+- **AND** the response SHALL explicitly state the skip reason: `這不走 Spectra，因為 X`
 
 ### Requirement: Launchd Service Hygiene
 
