@@ -28,8 +28,9 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 
 # 全域規則入口
 
-> Auto-loaded = rules/ (routing.md, triggers.md, ssot.md, skill-install.md, mesh-flow.md)
-> Reference = mesh/（flow.yaml, failure-types.md, retry-policy.md — 原始設計文件，規則已整合至 rules/mesh-flow.md）
+> Auto-loaded = rules/ (routing.md, triggers.md, ssot.md, skill-install.md, dev-pipeline.md, skills.md)
+> Reference = reference/mesh-flow.md（失敗回退邏輯，執行 Wave 時才讀）、reference/formatter.md（格式審查細節，Review 前才讀）
+> Reference = mesh/（flow.yaml, failure-types.md, retry-policy.md — 原始設計文件）
 > Auto-loaded = soul.md（人格底層，每次 session 必讀）
 > Auto-loaded = lessons.md（被糾正的規則，每次 session 必讀）
 
@@ -39,26 +40,56 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 - 收到任務 → 工具執行，不列步驟（例外：用戶明確要求「列出步驟讓我看」）
 - 編輯/部署前確認路徑、branch、環境
 - 推測必須標註「這是推測，還沒驗證」（例外：用戶問「你覺得呢」→ 可給初步推測）
-- 下結論前自問「如果這是錯的，什麼證據能推翻？」
+- 下結論前自問「如果這是錯的，什麼證據能推翻？」；用工具驗證，不猜
 - 先寫測試再寫代碼（例外：臨時調試、原型驗證、一次性腳本）
-- 禁止討好型回應，必須先判斷方向正確性
+- 禁止討好型回應，回答完就停，不加「還需要什麼嗎？」之類客套話
 - 禁止跳過強制分工規則（routing.md）
+- 刪除任何目錄前 MUST 先 `ls` 確認內容
+- Edit/Write 完成後不要 Read 回來驗證，信任自己剛寫的內容
+
+## 能做的事自己做（強制，無例外）
+
+寫「你需要手動做 X」之前，強制自問：「我有沒有工具能做這件事？」
+
+可用工具覆蓋範圍：
+- `gh` CLI — GitHub 幾乎所有操作（repo/PR/issue/release/settings/remote）
+- `git` — 所有版本控制
+- `bash` — 檔案操作、系統指令
+- `agent-browser` — 網頁操作
+- MCP 工具 — 各種整合
+
+只有以下情況才請用戶介入：貼 API key/token/密碼、2FA/OAuth 互動登入、付費操作、商業判斷（命名/定價/方向）
+
+## 完成標準（任務完成前必做）
+
+標記任何任務為「完成」前，強制走以下驗證：
+1. `git status` — 確認變更已 staged + committed
+2. 確認已 push 到正確 branch
+3. 若涉及部署 — 確認線上狀態與預期一致（curl / API 回讀）
+4. 若涉及 Spectra — 跑 validation，0 warnings 才算完
+
+禁止：「已完成」但未 push；禁止樂觀回報未持久化的變更。
+
+## 設定路徑先讀後用
+
+使用任何工具/MCP/CLI 的設定前，**先讀實際檔案確認路徑和格式**，不憑記憶猜測。
+
+常見錯誤模式（已記錄，禁止重蹈）：
+- MCP 設定：先 `cat ~/.claude/mcp.json` 確認現有結構再改
+- CLI model ID：先查 `which <tool>` + 執行 `<tool> --help` 確認支援的 flag
+- Spectra 路徑：先 `ls openspec/changes/` 確認現有結構
 
 ## Defaults（預設行為，可被專案層覆蓋）
 
-- 先白話解釋，後技術細節
+- 先白話解釋，後技術細節；預設用簡單語言，只在用戶要求時才給技術細節
 - 除錯先查基礎項（權限、路徑、是否存在），再猜外部原因
 - 非 GSD 的開發任務：對方向沒有 95% 信心前，先問問題釐清，不直接寫碼
 - 開始建造前，先說明如何驗證結果（測試指令、預期輸出、截圖方式）
-- 計畫必須走「正推 + 逆推」雙向驗證（BGO 引擎 6 精神）：
-  1. 正推：這樣做會成功的路徑是什麼？
-  2. 逆推：假設這樣做一定會失敗，失敗的原因是什麼？
-  3. 把逆推發現的風險寫進計畫，標註對策或砍掉
-  - 跟 TDD 同理：先寫「會失敗的測試」，再讓它通過
-  - 適用於：技術架構、開發排程、功能規格、API 設計
-  - 不適用於：純文件修改、格式調整、1-2 行 hotfix
+- 計畫走「正推 + 逆推」雙向驗證（BGO 引擎）：正推成功路徑 → 逆推假設失敗原因 → 把風險寫進計畫標對策
+  - 適用：技術架構、開發排程、功能規格、API 設計
+  - 不適用：純文件修改、格式調整、1-2 行 hotfix
 
-## Preferences（偏好，可視情況調整）
+## Preferences（偏好）
 
 - 複雜概念用表格 + 文字圖解
 
@@ -68,52 +99,7 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 **標準**：Spectra 完整工作流 — `/spectra:discuss` → `/spectra:propose` → `/spectra:apply` → `/spectra:archive`
 **遷移**：舊 Spec Kit 的三道 Gate + 規格模板已遷移至 `~/.claude/skills/spectra-propose/knowledge-*.md`
 
-詳見：
-- 專案層設定：`Development/CLAUDE.md` 的「Spectra 工作流」段落
-- 全局路由決策樹：同上檔案內「完整工作流」表格
-
-## Spectra 路由分工指引（強制，所有 SDD 專案）
-
-所有使用 Spectra 進行 Spec-Driven Development 的專案都應遵循以下路由分工原則。
-
-**核心原則**：
-- 不用 Sonnet（成本高）
-- 優先用 **copilot gpt-5.2-codex**（免費額度、精準度高）
-- UI 用 **cursor-agent**（零 token）
-- 審查用 **Kimi MCP**（3+ 檔案分析）
-- 每個 change 目標 ≤ 20K tokens（節省 70% 成本）
-
-**強制包含**：
-
-1. **proposal.md**：
-   - 新增「## Implementation Strategy」段落
-   - 分析：此變更應拆為多個並行 change 嗎？
-
-2. **design.md**（若存在）：
-   - 新增「## Implementation Distribution Strategy」段落
-   - 代理分配表：工作項 → 承擔代理 → 工具 → 估時 → 理由
-   - 並行策略：Sprint 時序 + 可並行任務
-   - Token 成本估算：總計 + vs Sonnet 的節省比例
-
-3. **tasks.md**：
-   - 每個任務標註 `[Tool: <tool-name>]`
-   - 可用工具：
-     - `[Tool: copilot-codex]` — 核心邏輯、API、測試
-     - `[Tool: copilot-gen]` — SQL、簡單代碼、文件
-     - `[Tool: cursor]` — UI、React、本機偵察
-     - `[Tool: codex]` — 執行命令、跑測試
-     - `[Tool: kimi]` — Code Review（3+ 檔案）
-
-**參考資源**：
-- 詳細指南：`/Development/2-顧問/Gmail/openspec/ROUTING_GUIDE.md`
-- 快速開始：`/Development/2-顧問/Gmail/openspec/QUICK_START.md`
-- 並行執行案例：`/Development/2-顧問/Gmail/openspec/PARALLEL_EXECUTION_PLAN.md`
-- Spectra schema 維護：`/Development/2-顧問/Gmail/openspec/schemas/gmail-routing/`
-
-**使用方式**：
-- 新專案若有 Spectra，會自動套用 `gmail-routing` schema（via symlink @ `~/.claude/schemas/gmail-routing`）
-- 若無 Spectra，模型會參考本段指引執行路由分工
-- 跨對話一致性保證：同一套原則、同一份檔案來源
+Spectra 路由分工細則（含 Gmail 專案路徑）→ 見 `Development/CLAUDE.md`
 
 ## 環境事實
 

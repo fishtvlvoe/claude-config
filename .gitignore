@@ -57,3 +57,6 @@ _usage.jsonl
 # Spectra app data
 .spectra/
 openspec/.vector-search.db*
+
+# Archived files (local backup only)
+_archived_*/
