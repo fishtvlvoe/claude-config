@@ -1,20 +1,75 @@
 schema: spec-driven
+context: |
+  # 產品定位
+  claude-config 是 Fish 的 Claude Code 全域設定管理 repo，包含：
+  - ~/.claude/rules/ — 工作流規則（routing.md、triggers.md、ssot.md 等）
+  - ~/.claude/skills-snapshot/ — 自建 skill 備份
+  - ~/.claude/lessons.md、soul.md — 人格底層與踩坑紀錄
+  - ~/.claude/mesh/ — 任務失敗回退系統設計
+  用途：跨機備份、換機快速復原、未來可分享給其他 Claude Code 用戶。
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+  # Tech Stack
+  - 純 Markdown + YAML（無需編譯 / 無依賴）
+  - Git 版控（GitHub：fishtvlvoe/claude-config）
+  - Skills 格式：SKILL.md（YAML frontmatter + Markdown 內文）
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  # 目錄結構
+  - rules/ — 自動載入的全域規則
+  - reference/ — 需要時才 Read 的參考文件
+  - mesh/ — 任務執行流程設計
+  - skills-snapshot/ — Skill 備份（從 ~/.claude/skills/ 複製而來）
+  - memory/ — 記憶檔案（lessons、projects 等）
+
+  # 變更性質
+  - 多為規則調整、Skill 客製、記憶檔維護
+  - 少數為新 Skill 開發
+
+  # 程式碼規範
+  - 全繁體中文（人格底層、記憶、規則都給自己看）
+  - Skill 描述用繁中、參數用英文
+  - commit message 用繁中
+
+  # 同步流程
+  - 本地改 ~/.claude/skills/ 或 rules/ → cp 到 skills-snapshot/ → commit → push
+  - 其他專案不會自動拉取，換機時手動 git clone 或 pull
+
+# ─────────────────────────────────────────────────────────────────────
+rules:
+  proposal:
+    - 以繁體中文撰寫
+    - Why 段落限 1-3 句話，說明問題與急迫性
+    - What Changes 用 bullet list，每條以動詞起頭（新增/修改/移除），具體到檔案或 API 層級
+    - 破壞性變更必須加粗標示 **BREAKING**
+    - Non-Goals 段落必填：明確列出本次不做的事，避免 scope creep
+    - Capabilities 章節要與 specs/ 目錄的名稱完全一致（kebab-case）
+    - Impact 段落必含：Affected specs、Affected code、Dependencies 新增、環境變數新增
+
+  design:
+    - 以繁體中文撰寫
+    - 僅在以下情況建立：跨模組變更、新外部依賴、新資料模型、效能或安全複雜度高
+    - Decisions 每條必須包含 Alternatives Considered（至少列 2 個被否決的方案 + 理由）
+    - Risks / Trade-offs 用「[Risk] → Mitigation」格式
+    - Migration Plan 必含部署步驟 + 回滾策略
+    - 禁用「可能」「或許」「看情況」；不確定的事放進 Open Questions 明列
+    - 涉及時區的邏輯必須明確寫 Asia/Taipei，禁止用「當地時間」
+    - 涉及 DB schema 必須列 SQL DDL 含 index
+
+  specs:
+    - 使用英文撰寫（normative language：SHALL / MUST / WHEN / THEN）
+    - 每個 Requirement 至少一個 Scenario，Scenario 用 WHEN/THEN 格式
+    - Scenario 用 exactly 4 hashtags（####），使用 3 個或 bullet 會 silently fail
+    - 禁用 should / may / might / consider / possibly / TBD / TODO
+    - MODIFIED 需求必須複製完整 requirement block 再編輯，不可只寫 delta
+    - 邊界條件必寫：空輸入、最大限制、錯誤情境
+    - 每個涉及 API 的 requirement 必須明確標示 HTTP method + path + status code
+
+  tasks:
+    - 以繁體中文撰寫
+    - 每個 task 用 checkbox 格式：`- [ ] X.Y 任務描述`
+    - 每個 task 必須標記 `[Tool: <agent>]`（codex / copilot-codex / copilot-gen / cursor / kimi / sonnet）
+    - 可並行任務加 `[P]` 標記
+    - 每個 task 描述必須包含對應的 spec Requirement name 或 design Decision 標題（analyzer 做 substring 比對）
+    - 每個 task 粒度：單人 30 分鐘內完成
+    - TDD 模式下測試任務必須在實作任務之前
+    - Review 任務獨立成 group，指派 kimi MCP 處理多檔分析
+    - 部署任務必列於最末 group
