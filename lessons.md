@@ -37,3 +37,4 @@
 | L037 | 「取消訂單」需求必須先問清楚：是取消整筆訂單（父訂單 status→cancelled）還是取消訂單內的某個商品行（對應子訂單 cancelChildOrder）。兩者完全不同，不可憑字面假設。 | Spectra propose 需求釐清 |
 | L039 | 每個階段完成後，MUST 主動告知下一步是什麼、需要用戶做什麼決定，不能做完就停在那裡等問。格式：「下一步是 X，需要你 Y，我的判斷是 Z，你要繼續嗎？」 | 任何任務完成後 |
 | L040 | SDD 任務執行中，不需要用戶判斷的步驟（測試通過、build 通過、commit、下一個 Wave）MUST 自動往下走，不等指令。只有以下情況才停下來等用戶：重大架構決策、需要外部資料（客戶提供）、代理全部失敗無法繼續。每個 Wave 完成後主動回報進度摘要（做了什麼、結果如何、下一步是什麼）。 | SDD 執行期間 |
+| L044 | React hook 回傳物件的 callback（如 `useConversation` 的 `onConnect`、`useWebSocket` 的 `onOpen`）內，**禁止**呼叫 hook 本身回傳的方法（`conversation.sendUserMessage` 等）。閉包抓到初始化未完成的舊值 → 靜默失敗無錯誤。改法：callback 只更新 state，後續動作用 `useEffect` 監聽該 state 觸發。症狀：功能不動、Console 無 error、WebSocket frames 看不到對應 message。 | React hook callback 閉包陷阱 |
