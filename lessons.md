@@ -38,3 +38,5 @@
 | L039 | 每個階段完成後，MUST 主動告知下一步是什麼、需要用戶做什麼決定，不能做完就停在那裡等問。格式：「下一步是 X，需要你 Y，我的判斷是 Z，你要繼續嗎？」 | 任何任務完成後 |
 | L040 | SDD 任務執行中，不需要用戶判斷的步驟（測試通過、build 通過、commit、下一個 Wave）MUST 自動往下走，不等指令。只有以下情況才停下來等用戶：重大架構決策、需要外部資料（客戶提供）、代理全部失敗無法繼續。每個 Wave 完成後主動回報進度摘要（做了什麼、結果如何、下一步是什麼）。 | SDD 執行期間 |
 | L044 | React hook 回傳物件的 callback（如 `useConversation` 的 `onConnect`、`useWebSocket` 的 `onOpen`）內，**禁止**呼叫 hook 本身回傳的方法（`conversation.sendUserMessage` 等）。閉包抓到初始化未完成的舊值 → 靜默失敗無錯誤。改法：callback 只更新 state，後續動作用 `useEffect` 監聽該 state 觸發。症狀：功能不動、Console 無 error、WebSocket frames 看不到對應 message。 | React hook callback 閉包陷阱 |
+| L045 | UI 任務（HTML 原型、React 元件、CSS 改動）commit 前 MUST 跑視覺驗證：用 playwright/chrome MCP 截圖每個畫面或狀態 → 主對話 Read 截圖確認渲染對 → 錯誤就退回 Agent 改。**禁止**「Agent 回報完成 + grep 字串存在」就 commit。理由：字面驗證 ≠ 行為驗證，HTML 結構正確不代表瀏覽器渲染對（CSS/JS 切換邏輯可能有 bug）。已踩兩次：03-ux-flow.html 的 execution tab 兩次都顯示 onboarding 內容、grep 通過但截圖才發現錯。 | 任何 UI 任務 commit 前 |
+| L046 | 派工給 cursor-agent / Sonnet 子代理做 UI 時，prompt 結尾 MUST 加：「完成後用 playwright 截圖每個畫面/狀態存到 /tmp/，把路徑列出，不要說『完成』，說『截圖在 X 請主對話驗證』」。沒附截圖證據 = 退回重做。理由：Agent 回報的「完成」是它的主觀判斷，截圖才是客觀證據。 | 派工 UI 任務時 |
