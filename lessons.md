@@ -42,3 +42,4 @@
 | L046 | 派工給 cursor-agent / Sonnet 子代理做 UI 時，prompt 結尾 MUST 加：「完成後用 playwright 截圖每個畫面/狀態存到 /tmp/，把路徑列出，不要說『完成』，說『截圖在 X 請主對話驗證』」。沒附截圖證據 = 退回重做。理由：Agent 回報的「完成」是它的主觀判斷，截圖才是客觀證據。 | 派工 UI 任務時 |
 | L047 | Next.js 16+ 手機/外部 IP 連本機 dev server 時，CSS/JS 被跨來源保護擋住 → React hydrate 失敗 → skeleton 永遠不消失。修法：在 `next.config.ts` 加 `allowedDevOrigins: ['<LAN IP>']` 再重啟 server。症狀：API 正常、HTML 有回、但畫面卡在 loading。 | Next.js 手機實機測試 |
 | L048 | iOS Safari 在 `http://` 環境下：(1) `navigator.share()` 拋 NotAllowedError 靜默失敗；(2) `<a download>` 不觸發「儲存到相簿/檔案」彈窗，改在新分頁開圖。兩個行為都需要 HTTPS 才正常。本機測試看到這些現象不是 bug，部署到 Vercel 後自動修復。 | iOS 手機實機測試 |
+| L049 | 派工給 Copilot CLI（`copilot --yolo`）時，MUST 加 `--add-dir src/` 限制只能動 src 目錄。`--yolo` 模式下 Copilot 有完整寫/刪權限，會動到 openspec/、.claude/、.agent/ 等非代碼目錄，導致 Spectra change 檔案被刪除。已踩坑：form-field-redesign 的 openspec/ 目錄被 Copilot 刪除，需手動從 session 記憶重建。正確呼叫：`copilot --yolo --add-dir src/ --model gpt-5.2 -p @prompt.txt` | Copilot CLI 派工 |
