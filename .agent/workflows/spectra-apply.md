@@ -1,6 +1,6 @@
 ---
 name: Spectra: Apply
-description: Implement tasks from a Spectra change
+description: "Implement Spectra change tasks"
 category: Workflow
 tags: ["workflow", "artifacts"]
 ---

@@ -1,6 +1,6 @@
 ---
 name: Spectra: Audit
-description: Audit changed code for security sharp edges — dangerous defaults, type confusion, and silent failures
+description: "Security audit on changed code"
 category: Development
 tags: ["development", "security", "audit"]
 ---

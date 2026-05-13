@@ -4,14 +4,14 @@
 
 This project uses Spectra for Spec-Driven Development(SDD). Specs live in `openspec/specs/`, change proposals in `openspec/changes/`.
 
-## Use `/spectra:*` skills when:
+## Use `/spectra-*` skills when:
 
-- A discussion needs structure before coding → `/spectra:discuss`
-- User wants to plan, propose, or design a change → `/spectra:propose`
-- Tasks are ready to implement → `/spectra:apply`
-- There's an in-progress change to continue → `/spectra:ingest`
-- User asks about specs or how something works → `/spectra:ask`
-- Implementation is done → `/spectra:archive`
+- A discussion needs structure before coding → `/spectra-discuss`
+- User wants to plan, propose, or design a change → `/spectra-propose`
+- Tasks are ready to implement → `/spectra-apply`
+- There's an in-progress change to continue → `/spectra-ingest`
+- User asks about specs or how something works → `/spectra-ask`
+- Implementation is done → `/spectra-archive`
 
 ## Workflow
 
@@ -22,13 +22,13 @@ discuss? → propose → apply ⇄ ingest → archive
 
 ## Parked Changes
 
-Changes can be parked（暫存）— temporarily moved out of `openspec/changes/`. Parked changes won't appear in `spectra list` but can be found with `spectra list --parked`. To restore: `spectra unpark <name>`. The `/spectra:apply` and `/spectra:ingest` skills handle parked changes automatically.
+Changes can be parked（暫存）— temporarily moved out of `openspec/changes/`. Parked changes won't appear in `spectra list` but can be found with `spectra list --parked`. To restore: `spectra unpark <name>`. The `/spectra-apply` and `/spectra-ingest` skills handle parked changes automatically.
 
 <!-- SPECTRA:END -->
 
 # 全域規則入口
 
-> Auto-loaded = rules/ (routing.md, triggers.md, ssot.md, skill-install.md, dev-pipeline.md, skills.md)
+> Auto-loaded = rules/ (routing.md, triggers.md, ssot.md, dev-pipeline.md, skills.md)
 > Reference = reference/mesh-flow.md（失敗回退邏輯，執行 Wave 時才讀）、reference/formatter.md（格式審查細節，Review 前才讀）
 > Reference = mesh/（flow.yaml, failure-types.md, retry-policy.md — 原始設計文件）
 > Auto-loaded = soul.md（人格底層，每次 session 必讀）
@@ -96,7 +96,7 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 ## 標準化決策：Spectra 工作流（2026-04-13）
 
 **廢棄**：`/spec`、`/speckit.*` 系列
-**標準**：Spectra 完整工作流 — `/spectra:discuss` → `/spectra:propose` → `/spectra:apply` → `/spectra:archive`
+**標準**：Spectra 完整工作流 — `/spectra-discuss` → `/spectra-propose` → `/spectra-apply` → `/spectra-archive`
 **遷移**：舊 Spec Kit 的三道 Gate + 規格模板已遷移至 `~/.claude/skills/spectra-propose/knowledge-*.md`
 
 Spectra 路由分工細則（含 Gmail 專案路徑）→ 見 `Development/CLAUDE.md`
@@ -120,3 +120,6 @@ Spectra 路由分工細則（含 Gmail 專案路徑）→ 見 `Development/CLAUD
 @soul.md
 @lessons.md
 @RTK.md
+# graphify
+- **graphify** (`~/.claude/skills/graphify/SKILL.md`) - any input to knowledge graph. Trigger: `/graphify`
+When the user types `/graphify`, invoke the Skill tool with `skill: "graphify"` before doing anything else.
