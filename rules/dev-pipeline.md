@@ -6,7 +6,7 @@
 
 **Phase 1 — 規劃**：由 Opus 與用戶討論決策；cursor-agent 負責產出 spec.md + tasks.md + HTML UI mockup。
 
-**Phase 2 — TDD 測試**：撰寫紅燈測試以定義成功條件；建立 fixture/stub；進行覆蓋率審查。
+**Phase 2 — TDD 測試（強制不可跳）**：先逆推失敗點 → 產出「失敗矩陣表」（每個失敗點對應紅燈測試名稱 + 預期錯誤訊息）→ Fish 確認後派 Sonnet / Copilot 只寫紅燈測試（不寫實作）→ 跑測試確認全紅燈 → 紅燈清單再給 Fish 確認後才進 Phase 3。詳細哲學基礎見「SDD = Popper 證偽主義」段（lessons.md L074）。
 
 **Phase 3 — 實作**：核心架構、UI 元件、代碼、文案等多層級平行執行。並行原則：不同檔案可並行，同檔案必須串行。
 
