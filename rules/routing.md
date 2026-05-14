@@ -4,10 +4,10 @@
 
 ## 🔴 硬規則（不可違反）
 
-1. **Spectra 強制入口**：執行類任務 → `/spectra:*`，禁止用 TaskCreate/TodoList 替代
+1. **Spectra 強制入口**：執行類任務 → `/spectra-*`，禁止用 TaskCreate/TodoList 替代
 2. **外顯路由**：每個任務第一句話說「路由：X，派 Y」
 3. **超過 5 行代碼 → 派外部 Agent**，不自己寫
-4. **程式碼撰寫只能派 Copilot CLI、Kimi CLI 或 Sonnet 子代理**（無例外）。其他工具（Codex、Cursor、Gemini、Haiku）一律不准寫程式碼
+4. **程式碼撰寫只能派 Copilot CLI、Kimi CLI、Codex CLI 或 Sonnet 子代理**（無例外）。其他工具（Cursor、Gemini、Haiku）一律不准寫程式碼
 5. **研究 / 網路查詢 → 派 Gemini / Kimi CLI**，Claude 子代理沒上網能力
 6. **說工具「不能用」前 → 先 `which <tool>` 確認**
 
@@ -20,6 +20,7 @@
 | 業務邏輯 / API / 測試 / UI 元件 / scaffold / 簡單修改 | **Copilot CLI** | `copilot -p --yolo --model gpt-5.2` |
 | 機械式重構 / 批量改名 / 格式統一 / 模式套用 / 成本敏感任務 | **Kimi CLI** | `kimi --print -w <code-dir> -p "..."`（見下方 Kimi CLI 用法備忘） |
 | 複雜整合 / 跨多模組 / E2E 測試 / 高複雜度推理 | **Sonnet 子代理** | `Agent` with `claude-sonnet` |
+| 大型 agentic / openai 模型偏好 / 需沙盒隔離的多檔修改 | **Codex CLI** | `codex exec -C <dir> -s workspace-write "..."` |
 | 1-2 行 hotfix | 主對話 | — |
 
 ### 🔍 非程式碼撰寫（分析、研究、審查、雜事）
@@ -56,19 +57,41 @@ kimi --print -w src/ --add-dir types/ -p "..."
 
 **防護 SDD 檔案**（L069）：派工前先 `git add openspec/ .claude/ && git commit`；`-w` 只指程式碼目錄；prompt 結尾加禁令；派工後 `git diff --stat` 檢查。
 
+### Codex CLI 寫碼用法備忘
+
+```bash
+# 標準非互動派工（workspace-write = 只能改工作目錄）
+codex exec -C src/ -s workspace-write "重構 X 模組..."
+
+# 完全繞過確認（等同 --yolo，在 CI / 全自動流程用）
+codex exec -C src/ --dangerously-bypass-approvals-and-sandbox "..."
+
+# 指定模型
+codex exec -C src/ -s workspace-write -m o4-mini "..."
+
+# 從 stdin 讀 prompt（適合 prompt 很長）
+cat prompt.txt | codex exec -C src/ -s workspace-write
+
+# 多工並行：不同目錄可同時跑（shell 背景執行）
+codex exec -C apps/web -s workspace-write "改 UI" &
+codex exec -C apps/api -s workspace-write "改 API" &
+wait
+```
+
+**Codex × Claude Code 多工串接模式**：
+- Claude（PM）把任務拆成「不同目錄/不同檔案」的工作包
+- 同一訊息用多個 Bash tool call 並行 dispatch `codex exec &`
+- 所有 Codex 任務完成後 Claude 統一 `git diff --stat` 驗收 → CR → commit
+
+**防護 SDD 檔案**：同 L069/L050 — 派工前先 `git add openspec/ .claude/ && git commit`；`-C` 只指程式碼目錄；prompt 結尾加「禁止動 openspec/、.claude/、docs/」。
+
 ### ❌ 禁用工具（品質不穩，永不派工）
 
 | 工具 | 禁用範圍 | 替代方案 |
 |------|---------|---------|
-| **cursor-agent** | 全面禁用（不寫 UI、不 scaffold、不本機偵察） | UI → Copilot；複雜元件 → Sonnet；偵察 → 主對話 Grep/Glob |
+| **cursor-agent** | 全面禁用（不寫 UI、不 scaffold、不本機偵察） | UI → Copilot；複雜元件 → Sonnet / Codex；偵察 → 主對話 Grep/Glob |
 
 **例外**：Fish 明確點名要用 Cursor 做某件事 → 才用，否則一律不准。
-
-### ⚠️ 外部代理（Fish 手動餵 prompt，非 Claude 派工）
-
-| 工具 | 使用方式 | 備註 |
-|------|---------|------|
-| **Codex** | Fish 自己餵 prompt，Claude 負責打包 SDD 和監控產出 | 2026-05 解禁，已付費 |
 
 ## 工作流層級
 
@@ -105,7 +128,7 @@ Claude（PM）→ 企劃、拆任務、驗證、整合
 
 ## Fallback 順序（程式碼撰寫）
 
-Copilot CLI 失敗 → Kimi CLI → Sonnet 子代理 → 主對話直接寫。切換時主動告知用戶。**永遠不會 fallback 到 Codex 或 Cursor。**
+Copilot CLI 失敗 → Kimi CLI → Codex CLI → Sonnet 子代理 → 主對話直接寫。切換時主動告知用戶。**永遠不會 fallback 到 Cursor。**
 
 ---
 
