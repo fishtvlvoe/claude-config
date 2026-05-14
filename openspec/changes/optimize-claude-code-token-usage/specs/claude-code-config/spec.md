@@ -77,7 +77,7 @@ Rule files exceeding 100 lines SHALL be split into speed-reference (`~/.claude/r
 
 ### Requirement: Spectra Default-On Rule
 
-All execution-type tasks (bug fix, feature add, refactor, debug, modification) MUST route through Spectra (`/spectra:propose`, `/spectra:ingest`, `/spectra:apply`, `/spectra:archive`).
+All execution-type tasks (bug fix, feature add, refactor, debug, modification) MUST route through Spectra (`/spectra-propose`, `/spectra-ingest`, `/spectra-apply`, `/spectra-archive`).
 
 The Claude assistant MUST declare routing as the first sentence of the response in format:
 `這任務會走 Spectra。對應 change：[名稱] / 需新建 / 續用既有`
