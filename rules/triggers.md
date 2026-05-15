@@ -16,6 +16,10 @@ action: 強制截圖驗證一致性；主動檢查排版、重疊、壓到問題
 trigger: 任何 `/spectra-apply` 或 SDD 推進至「開始寫實作」前
 action: **不可直接派 Copilot / Sonnet 寫程式碼**。第一件事走 Phase 2 — TDD：(1) 讀 design.md 的 Risks / Trade-offs + spec.md 的 acceptance criteria；(2) 產出「失敗矩陣表」每個失敗點 → 對應紅燈測試名稱 → 預期錯誤訊息；(3) 給 Fish 確認失敗矩陣（可請他補漏的失敗點）；(4) 派 Sonnet / Copilot **只寫紅燈測試、不寫實作**；(5) 跑測試確認全紅燈；(6) 紅燈清單給 Fish 確認後才進 Phase 3 寫實作。原因：SDD 是 Popper 證偽主義不是蓋房子瀑布式（dev-pipeline.md 哲學基礎段）。違反 = 退回 waterfall，被 Fish 糾正過。
 
+## Cross-impact 預檢（A 壞 B 預防，強制，L079）
+trigger: 任何 `/spectra-apply` 開跑前 | 任何要直接動程式碼前（即使無 Spectra）| 修改既有 service / API / DB query 前
+action: **不可直接動代碼或派 apply**。先派 Sonnet / Haiku 子代理跑 cross-impact 分析：grep 受影響 API / function / DB 表 / 欄位的所有 caller 與 consumer → 分類 ABCDEFG 列表 → 每段標 ✅ 無影響 / ⚠️ 需注意 / 🔴 高風險 → 寫到 `/tmp/cross-impact-<change>.md`。發現 🔴 → STOP，回頭擴大 change 範圍或補對策進 design.md；發現 ⚠️ → 補進 tasks.md 寫成明文步驟（不是嘴上講過去）。報告給 Fish review 後才進 apply。原因：Fish 多次反映「修 A 弄壞 B」是反覆出現的問題，預檢一次比事後 debug 三次便宜。違反 = 走進 waterfall + 線上回歸 bug。
+
 ## 主動記錄
 trigger: 解決 bug | 踩坑（環境/版本/邏輯）| 架構或流程決策 | 發現環境特殊限制
 action: 主動問「💡 這個值得記錄（[一句話描述]），要寫進 lessons.md 嗎？」。用戶說好 → 寫進 `~/.claude/projects/-Users-fishtv-Development/memory/lessons.md`（格式：問題→根因→解法→教訓→來源）。
