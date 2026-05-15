@@ -1,6 +1,6 @@
 ---
 name: Spectra: Archive
-description: Archive a completed change
+description: "Archive a completed change"
 category: Workflow
 tags: ["workflow", "archive"]
 ---

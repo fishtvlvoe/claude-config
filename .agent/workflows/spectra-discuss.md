@@ -1,6 +1,6 @@
 ---
 name: Spectra: Discuss
-description: Have a focused discussion about a topic and reach a conclusion
+description: "Discuss and reach a conclusion"
 category: Workflow
 tags: ["workflow", "discuss", "thinking"]
 ---

@@ -1,6 +1,6 @@
 ---
 name: Spectra: Ask
-description: Query {{SPEC_DIR}}documents and answer questions
+description: "Query Spectra documents"
 category: Workflow
 tags: ["workflow", "search", "query"]
 ---

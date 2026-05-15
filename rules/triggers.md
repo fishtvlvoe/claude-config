@@ -12,6 +12,14 @@ action: 立即建 Private GitHub repo，產出寫成 .md → commit → push（�
 trigger: 多頁面設計完成或修改後
 action: 強制截圖驗證一致性；主動檢查排版、重疊、壓到問題。
 
+## SDD 動工前強制逆推 + TDD 紅燈規劃（強制，L074）
+trigger: 任何 `/spectra-apply` 或 SDD 推進至「開始寫實作」前
+action: **不可直接派 Copilot / Sonnet 寫程式碼**。第一件事走 Phase 2 — TDD：(1) 讀 design.md 的 Risks / Trade-offs + spec.md 的 acceptance criteria；(2) 產出「失敗矩陣表」每個失敗點 → 對應紅燈測試名稱 → 預期錯誤訊息；(3) 給 Fish 確認失敗矩陣（可請他補漏的失敗點）；(4) 派 Sonnet / Copilot **只寫紅燈測試、不寫實作**；(5) 跑測試確認全紅燈；(6) 紅燈清單給 Fish 確認後才進 Phase 3 寫實作。原因：SDD 是 Popper 證偽主義不是蓋房子瀑布式（dev-pipeline.md 哲學基礎段）。違反 = 退回 waterfall，被 Fish 糾正過。
+
+## Cross-impact 預檢（A 壞 B 預防，強制，L079）
+trigger: 任何 `/spectra-apply` 開跑前 | 任何要直接動程式碼前（即使無 Spectra）| 修改既有 service / API / DB query 前
+action: **不可直接動代碼或派 apply**。先派 Sonnet / Haiku 子代理跑 cross-impact 分析：grep 受影響 API / function / DB 表 / 欄位的所有 caller 與 consumer → 分類 ABCDEFG 列表 → 每段標 ✅ 無影響 / ⚠️ 需注意 / 🔴 高風險 → 寫到 `/tmp/cross-impact-<change>.md`。發現 🔴 → STOP，回頭擴大 change 範圍或補對策進 design.md；發現 ⚠️ → 補進 tasks.md 寫成明文步驟（不是嘴上講過去）。報告給 Fish review 後才進 apply。原因：Fish 多次反映「修 A 弄壞 B」是反覆出現的問題，預檢一次比事後 debug 三次便宜。違反 = 走進 waterfall + 線上回歸 bug。
+
 ## 主動記錄
 trigger: 解決 bug | 踩坑（環境/版本/邏輯）| 架構或流程決策 | 發現環境特殊限制
 action: 主動問「💡 這個值得記錄（[一句話描述]），要寫進 lessons.md 嗎？」。用戶說好 → 寫進 `~/.claude/projects/-Users-fishtv-Development/memory/lessons.md`（格式：問題→根因→解法→教訓→來源）。
@@ -35,6 +43,10 @@ trigger: 任務完成 | git commit | session 結束 → 追加一行摘要（格
 ## Session 長度提醒
 trigger: assistant turns 超過 30 次（目測對話已經很長）
 action: 提醒用戶「這個 session 已經很長了，建議 /交接 + /clear 開新 session，避免 context 膨脹推高 Opus 成本」。只提醒一次。
+
+## Spectra config.yaml 前置檢查（強制）
+trigger: 執行 `/spectra-propose` | `/spectra-discuss` | `/spectra-ingest` | 任何 Spectra 工作流開始前
+action: 先讀 `openspec/config.yaml`，檢查是否同時有 `context:` 和 `rules:` 且內容非空（非註解模板）。缺任一 → 先補齊 config.yaml 再繼續 Spectra 流程。補齊方式：讀專案的 CLAUDE.md / package.json / README 取得產品定位和 Tech Stack，rules 段落複製 22-AIRE 範本（`/Users/fishtv/Development/22-AIRE/openspec/config.yaml`）再依專案特性調整。完成後告知用戶「config.yaml 已補齊」再進 Spectra。
 
 ## 核心 Skills 同步提醒
 trigger: 修改了以下任一 skill 並 commit：分配、dp、debug-buygo、deploy、token-report、ssc、tdd

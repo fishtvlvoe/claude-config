@@ -1,42 +1,46 @@
-# lessons.md — 被糾正的規則
+# lessons.md — 被糾正的規則（核心 / 跨專案）
 
 > 每次被 Fish 糾正 → 當場更新這裡。
 > session 開始時讀這個，避免重複犯同樣的錯。
+> 領域別 lessons 不在這裡，按需 Read：
+> - `~/.claude/lessons-spectra.md` — Spectra / SDD 工作流
+> - `~/.claude/lessons-web-deploy.md` — CSS / Vercel / Supabase / rsync / Postgres
+> - `~/.claude/lessons-frontend.md` — React / Next / iOS / Chrome / Vite
+> - `~/.claude/lessons-products.md` — BuyGo / huashu / three-ai 等專案專屬
 
-## 規則速查表
+## 規則速查表（核心通用）
 
 | # | 規則 | 觸發情境 |
 |---|------|---------|
-| L016 | 說「X 不能用」前必須先 `which X` 確認。已知：copilot/gemini/cursor 都可用 | 工具可用性 |
-| L017 | Supabase migration 直接用 CLI + DB URL，不叫用戶貼 SQL | DB migration |
+| L016 | 說「X 不能用」前必須先 `which X` 確認。已知：copilot/gemini/cursor/kimi/codex 都可用 | 工具可用性 |
 | L018 | 遇阻靜默試 B/C/D，全部失敗才回報，禁止中途打斷用戶 | 工具失敗 |
 | L019 | UI 按鈕/圖示一律用 SVG icon（Heroicons/Lucide），禁止 Emoji | UI 設計 |
 | L020 | 不確定的事自己查完再說話，禁止叫用戶「試試看」代勞驗證 | Debug |
 | L021 | Bug 流程：蒐集線索→列原因→工具逐一排除→確定根因→一次修復→自驗→才告知 | Debug |
-| L022 | Gmail 專案：Vercel + Supabase 已授權，.env 改了就自己去同步，不叫用戶手動改 | 環境變數同步 |
 | L023 | 任何「需要重複改同一件事」的操作，必須自動化完成，不問用戶 | 自動化原則 |
-| L024 | Vercel 操作一律用 CLI（vercel env / vercel deploy），不開瀏覽器 | Vercel 操作 |
-| L025 | Supabase 操作一律用 CLI（supabase db / supabase secrets），不開瀏覽器 | Supabase 操作 |
-| L026 | Spectra Propose 第 8 步（Inline Self-Review）時檢查 Consistency：每個 design.md 的決策都要在 tasks.md 中被引用，當場修正，不等分析器發現 | Spectra propose 工作流 |
-| L027 | Spectra Apply 開始前，必須先做任務分工分析（哪些任務給哪個工具：Copilot/Cursor/Kimi/Codex），給用戶確認後才開始執行。禁止擅自用自己的 token 跑多任務。 | Spectra apply 工作流 |
-| L028 | 所有開發任務必須建立 Spectra Change（propose/debug），不允許只存在對話紀錄。執行完才標 [x]，流程：propose→analyze→apply（分配 Agent）→結果回 Sonnet 審核→需 debug 再開新 Change。這是標準 SDD Loop，無例外。 | 工作流程 |
-| L029 | CSS/HTML 改完 MUST 用 curl/fetch 抓線上頁面驗證，不能只看原始碼就說「修好了」 | CSS 驗收 |
-| L030 | 覆蓋按鈕或有漸層的元素，MUST 同時設定 background-color + background-image: none + box-shadow: none，只改 background-color 不夠 | CSS gradient 覆蓋 |
 | L031 | 大檔案（>100 行）用 Grep 定位行號，再用 Read offset/limit 只讀需要的段落，不要整個讀進來 | 讀檔效率 |
 | L032 | 自動化腳本失敗後 MUST 先記錄實際狀態（期望找到什麼 vs 實際找到什麼）到 log，才決定是否重試，不得用同樣邏輯盲目 retry | 自動化 debug |
-| L033 | CSS 改兩次沒修好 → STOP，curl 抓 theme CSS，列出影響目標元素的所有 rule 再診斷，不要繼續疊 patch | CSS 根因診斷 |
 | L034 | 任何擴展點（include/hook/slot）用前 MUST 先查文件確認正確名稱，不猜檔名 | 平台整合 |
 | L035 | 建 repo 後第一件事：.gitignore、LICENSE、README；依賴管理檔 MUST 固定版本，不要先寫內容再補基礎設施 | 專案初始化 |
 | L036 | 加任何平台設定前先確認目標平台版本和限制（如 GitHub Pages 用 Jekyll 3.10 不是 Jekyll 4），不確定就查官方文件 | 平台版本確認 |
-
-| L038 | rsync 部署後 MUST 執行 `find <plugin_dir> -type d -exec chmod 755 {} \; && find <plugin_dir> -type f -exec chmod 644 {} \;` 修正權限，否則靜態資源（CSS/JS）會回 403 | rsync 部署後 |
-| L041 | 禁止叫 Fish 開瀏覽器操作任何事情。瀏覽器操作一律用 agent-browser MCP 或 gh CLI 自己完成。唯一例外：需要 Fish 親自授權的事（貼 API Key、2FA、付費操作、手動 Webhook 授權）。違反 = 白工。 | 任何需要瀏覽器的操作 |
-| L042 | sshpass + rsync 部署 SOP：(1) `SSHPASS='<pw>' sshpass -e ssh -o StrictHostKeyChecking=no -p <port> user@host` 測連線，(2) rsync 時用 `-e "sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p <port>"`，(3) 部署後 MUST 跑 `find <dir> -type d -exec chmod 755 {} \; && find <dir> -type f -exec chmod 644 {} \;`。常見坑：source 端目錄是 700（macOS 預設），rsync 會原樣帶過去，導致 WordPress/Apache 讀不到檔案回 403。每次 rsync 部署後不管 source 權限長怎樣，都強制重設權限。 | sshpass + rsync 部署 |
-| L043 | 用戶貼 DevTools console 的 403/500 錯誤來 debug 前，MUST 先 SSH 去看 server access log（`~/web/<site>/logs/<site>.log`）的時間戳與 HTTP 狀態分布（`awk '{print $9}' | sort | uniq -c`），確認錯誤是否是「當下正在發生」還是「DevTools 保留的歷史紀錄」。判斷方式：比對 access log 最後一筆 200/500 的時間 vs 部署完成時間。部署後若 log 全是 200，就叫用戶 Cmd+Shift+R 強制刷新，不要憑 console 舊紀錄動手改代碼。 | Debug 403/500 前必做 |
-
-| L037 | 「取消訂單」需求必須先問清楚：是取消整筆訂單（父訂單 status→cancelled）還是取消訂單內的某個商品行（對應子訂單 cancelChildOrder）。兩者完全不同，不可憑字面假設。 | Spectra propose 需求釐清 |
 | L039 | 每個階段完成後，MUST 主動告知下一步是什麼、需要用戶做什麼決定，不能做完就停在那裡等問。格式：「下一步是 X，需要你 Y，我的判斷是 Z，你要繼續嗎？」 | 任何任務完成後 |
 | L040 | SDD 任務執行中，不需要用戶判斷的步驟（測試通過、build 通過、commit、下一個 Wave）MUST 自動往下走，不等指令。只有以下情況才停下來等用戶：重大架構決策、需要外部資料（客戶提供）、代理全部失敗無法繼續。每個 Wave 完成後主動回報進度摘要（做了什麼、結果如何、下一步是什麼）。 | SDD 執行期間 |
-| L044 | React hook 回傳物件的 callback（如 `useConversation` 的 `onConnect`、`useWebSocket` 的 `onOpen`）內，**禁止**呼叫 hook 本身回傳的方法（`conversation.sendUserMessage` 等）。閉包抓到初始化未完成的舊值 → 靜默失敗無錯誤。改法：callback 只更新 state，後續動作用 `useEffect` 監聽該 state 觸發。症狀：功能不動、Console 無 error、WebSocket frames 看不到對應 message。 | React hook callback 閉包陷阱 |
-| L045 | UI 任務（HTML 原型、React 元件、CSS 改動）commit 前 MUST 跑視覺驗證：用 playwright/chrome MCP 截圖每個畫面或狀態 → 主對話 Read 截圖確認渲染對 → 錯誤就退回 Agent 改。**禁止**「Agent 回報完成 + grep 字串存在」就 commit。理由：字面驗證 ≠ 行為驗證，HTML 結構正確不代表瀏覽器渲染對（CSS/JS 切換邏輯可能有 bug）。已踩兩次：03-ux-flow.html 的 execution tab 兩次都顯示 onboarding 內容、grep 通過但截圖才發現錯。 | 任何 UI 任務 commit 前 |
-| L046 | 派工給 cursor-agent / Sonnet 子代理做 UI 時，prompt 結尾 MUST 加：「完成後用 playwright 截圖每個畫面/狀態存到 /tmp/，把路徑列出，不要說『完成』，說『截圖在 X 請主對話驗證』」。沒附截圖證據 = 退回重做。理由：Agent 回報的「完成」是它的主觀判斷，截圖才是客觀證據。 | 派工 UI 任務時 |
+| L041 | 禁止叫 Fish 開瀏覽器操作任何事情。瀏覽器操作一律用 agent-browser MCP 或 gh CLI 自己完成。唯一例外：需要 Fish 親自授權的事（貼 API Key、2FA、付費操作、手動 Webhook 授權）。違反 = 白工。 | 任何需要瀏覽器的操作 |
+| L045 | UI 任務（HTML 原型、React 元件、CSS 改動）commit 前 MUST 跑視覺驗證：用 playwright/chrome MCP 截圖每個畫面或狀態 → 主對話 Read 截圖確認渲染對 → 錯誤就退回 Agent 改。**禁止**「Agent 回報完成 + grep 字串存在」就 commit。理由：字面驗證 ≠ 行為驗證，HTML 結構正確不代表瀏覽器渲染對。 | 任何 UI 任務 commit 前 |
+| L046 | 派工給 cursor-agent / Sonnet 子代理做 UI 時，prompt 結尾 MUST 加：「完成後用 playwright 截圖每個畫面/狀態存到 /tmp/，把路徑列出，不要說『完成』，說『截圖在 X 請主對話驗證』」。沒附截圖證據 = 退回重做。 | 派工 UI 任務時 |
+| L049 | 派工給 Copilot CLI（`copilot --yolo`）時，MUST 加 `--add-dir src/` 限制只能動 src 目錄。`--yolo` 模式下 Copilot 有完整寫/刪權限，會動到 openspec/、.claude/、.agent/ 等非代碼目錄。正確呼叫：`copilot --yolo --add-dir src/ --model gpt-5.2 -p @prompt.txt` | Copilot CLI 派工 |
+| L050 | 派任何外部代理（Copilot CLI / Sonnet 子代理）前，MUST 跑 `git status` 檢查 untracked 的重要檔案；有則先 `git add openspec/ .claude/ docs/ && git commit -m "wip: pre-dispatch checkpoint"` 才派工。`--add-dir src/` 只限制「主動編輯」範圍，不限制 bash 指令；Copilot --yolo 會跑 `git restore` / `git clean -fd` 把 untracked 檔案永久刪除（unlink，git reflog 也救不回）。prompt MUST 用白名單：「只允許跑 npm test、git status、git diff，禁止任何其他 git 指令（特別是 clean、restore、reset、checkout）」。 | 派工外部代理前 |
+| L053 | L050 補強：Copilot CLI 即使加 `--add-dir`，看到 `git diff --stat` 出現「跟我這個任務無關的檔案」就會自作主張 restore 它們。真正的防護：每個 Wave 結束就 `git add -A && git commit -m "wip: ..."`，不留 untracked / modified 給下個 Wave；prompt 結尾明文「只允許 `git diff --stat` `git diff` `git status`，禁止 `git restore` `git checkout` `git clean` `git reset`」。 | Copilot CLI 派工 |
+| L069 | 派 Kimi CLI 寫碼前 MUST 防護 SDD 檔案。Kimi CLI 沒有排除目錄的 flag，`-w` 設工作目錄 = 它能動的全部範圍。SOP：(1) 派工前 `git add openspec/ .claude/ && git commit -m "wip: pre-kimi checkpoint"`；(2) `-w` 只指向程式碼目錄（如 `-w src/`），不指向專案根目錄；(3) prompt 結尾加禁令：「只修改程式碼檔案，禁止動 openspec/、.claude/、docs/」；(4) 派工後 `git diff --stat` 檢查。**`--add-dir` 是「擴展」scope 不是「限制」**。 | Kimi CLI 派工 |
+| L071 | 派外部代理做 SDD apply 前，MUST 先確認 SDD 路徑與工作 git repo 對齊：(1) `cd` 到目標目錄；(2) `git remote -v` 確認 origin 是 Fish 自己的 repo，不是上游 fork；(3) 確認 `git rev-parse --show-superproject-working-tree` 無輸出（不在 submodule 內）；任一檢查失敗 = 停下、改路徑或重 propose。 | 派代理跑 SDD apply 前 |
+| L074 | **SDD 是程式設計版的 Popper 證偽主義，不是蓋房子瀑布式**。動工順序：propose（提出假說）→ 逆推失敗點 → 寫紅燈測試把每個失敗點具體化（Phase 2 — TDD，不可跳）→ 紅燈成立 → 才派 Copilot / Sonnet 寫實作讓紅變綠 → 紅燈不過時 ingest 改 propose（Quine-Duhem 理論修正循環）。禁止「先 apply 看實物再回頭修圖」（waterfall 反模式）。禁止用「蓋房子」比喻 SDD。 | 任何 SDD 動工前 |
+| L075 | 派工 CLI 代理前 MUST 用正確模型參數。已驗證預設：Copilot CLI → `gpt-5.2`、Codex CLI → `gpt-5.3-codex`（ChatGPT 帳號不支援 `o4-mini`/`o4`）、Kimi CLI → 內建預設。錯誤模型名會導致 CLI 直接報錯退出，非互動模式下看起來像「靜默失敗」。 | CLI 代理派工 |
+| L076 | Agent tool call 的 XML 參數值內禁止插入任何描述文字。錯誤：`<parameter name="subagent_type">general-purpose</parameter>(讀截圖...)\n<parameter name="model">haiku`。parser 會把 `</parameter>` 之後的文字全吞進前一個參數值。派工說明只能寫在 tool call 之外的文字輸出裡，不能夾在 XML 標籤之間。 | Agent tool call XML 格式 |
+| L077 | **程式碼風格衝突時必須明說選哪一種**，不要「兩邊都用、混在一起」。觸發：同個 codebase 看到兩種風格（例：camelCase vs snake_case、tab vs space、early-return vs nested-if）→ 必須先看哪種佔多數或先看 .editorconfig/prettier 設定，跟著佔多數的走；無法決定時直接問用戶「A 還是 B？」。禁止：「為了相容性兩個都保留」、「這檔案用 A 那檔案用 B」式的悄悄混用。理由：Karpathy 規則 7，模型平均化策略會讓 codebase 風格腐爛。 | 任何寫碼任務開始前 |
+| L078 | **長任務每完成一個邏輯子步驟 MUST 建存檔點**（`git add -A && git commit -m "wip: <子步驟>"`），不依賴對話 history 當備份。觸發：超過 3 個子步驟的任務、跨 Wave 的 SDD、需要派多次外部代理的工作。理由：(1) 對話被 compact 或 session 換手時，未 commit 的工作會丟；(2) 派外部代理踩 L050/L053 坑會把 untracked 工作 git clean 掉；(3) 用戶中途要看「目前做到哪」可以 `git log --oneline` 看。一個子步驟做完不 commit 就不算開始下一步。 | 多步任務每個子步驟結束 |
+| L079 | **寫代碼前 / spectra-apply 前 MUST 跑 cross-impact 分析（A 壞 B 預檢）**。Fish 多次反映：以前修 A 常常把 B 弄壞。觸發：spectra-propose 完成、spectra-apply 開跑前、或直接動程式碼前。動作：派 Sonnet/Haiku 子代理 grep 所有受影響 API/function/DB 表/欄位的 caller 與 consumer，輸出 ABCDEFG 分類報告，每段標 ✅ 無影響 / ⚠️ 需注意 / 🔴 高風險。報告寫到 `/tmp/cross-impact-<change>.md` 給用戶 review。發現 🔴 → STOP，回頭擴大 change 範圍或補對策進 design.md，**禁止硬上**；發現 ⚠️ → 把細節補進 tasks.md 寫成明文步驟（例：「合併邏輯第一次見 product 怎麼建、已存在怎麼累加、subItems 內 variation 怎麼分組」這種步驟級規範），不是嘴上講一下就跳過。實際應用範例：fix-shipment-details-expand-variations 預檢抓到 `mergeItemsByProduct` 的 `{...item}` spread 會讓 parent 欄位被最後一筆覆蓋，補進任務 3.1。**補強規則（2026-05-16 hotfix 1.7.12 踩坑後加）：改任何 REST API 行為前 MUST 先從前端往後 trace — `grep "fetch.*<endpoint>" `、`grep "/<resource>/"` 在 `includes/views/`、`admin/js/`、`admin/partials/` 找實際被打的 URL → 對應後端 handler → 改對 handler**。光看 service method caller 不夠，可能 service method 根本沒被 REST endpoint 用到（例如 fix-shipment-details-expand-variations 改了 `/shipments/{id}` 用的 `get_shipment_items`，但前端打的是 `/shipments/{id}/detail` 用 `get_shipment_detail` 獨立 SQL → 部署後子列不顯示 → 開 hotfix v1.7.12 補修 detail endpoint）。 | spectra-apply 前 / 任何寫代碼前 |
+
+## 變更歷程
+
+- 2026-05-15: 從 61 條拆分為核心 + 4 領域檔案，本檔保留 26 條（24 原 + L077 風格衝突 + L078 存檔點）
+- 2026-05-15: 新增 L079 cross-impact 預檢（A 壞 B 預防）

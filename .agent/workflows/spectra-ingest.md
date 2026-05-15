@@ -1,6 +1,6 @@
 ---
 name: Spectra: Ingest
-description: Update an existing Spectra change from a plan file or conversation context
+description: "Update change from external context"
 category: Workflow
 tags: ["workflow", "import", "plan", "claude"]
 ---

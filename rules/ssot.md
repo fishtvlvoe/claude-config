@@ -5,7 +5,8 @@
 | 資訊類型 | 唯一歸屬（寫這裡） | 禁止寫到 |
 |---------|-------------------|---------|
 | 今日進度 | `memory/today.md` | claude-mem（claude-mem 只用於跨日搜尋） |
-| 技術踩坑/教訓 | `memory/lessons.md` | today.md、CLAUDE.md 註解、claude-mem |
+| 全局技術教訓 | `memory/lessons.md` | today.md、CLAUDE.md 註解、claude-mem |
+| 開發類教訓 | `memory/lessons-dev.md` | lessons.md（領域專注，不混入） |
 | 判斷案例 | `memory/judgment-cases.md` | lessons.md（踩坑 ≠ 判斷） |
 | 專案戰略狀態 | `memory/projects.md` | today.md（today = 當日進度，不是狀態） |
 | 環境/SSH/部署 | `memory/environment.md` | CLAUDE.md `<conn>`（conn 只放指令事實） |
@@ -18,6 +19,9 @@
 | 失敗類型定義 | `mesh/failure-types.md` | 其他 memory 檔案 |
 | 任務歷史 | `memory/task-history/` | 其他位置 |
 | 失敗模式 | `memory/failure-patterns/` | 其他位置 |
+| 工作流參考 | `memory/workflow.md` | lessons.md、today.md（參考資料不是教訓） |
+| Token 策略 | `memory/token-optimization.md` | lessons.md（技術決策不是踩坑） |
+| 產品目錄 | `memory/products-directory.md` | projects.md（目錄 ≠ 戰略） |
 
 policy: 寫任何資訊前，先查 SSOT 表確認歸屬，寫錯地方 = 違規
 policy: 發現同一資訊出現在兩處 → 保留 SSOT 歸屬的那份，刪除另一份

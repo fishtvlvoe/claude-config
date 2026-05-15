@@ -1,6 +1,6 @@
 ---
 name: Spectra: Debug
-description: Systematically debug a problem using a four-phase workflow
+description: "Debug using four-phase workflow"
 category: Development
 tags: ["development", "debugging"]
 ---
