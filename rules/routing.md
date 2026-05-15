@@ -19,7 +19,7 @@
 |---------|------|------|
 | 業務邏輯 / API / 測試 / UI 元件 / scaffold / 簡單修改 | **Copilot CLI** | `copilot -p --yolo --model gpt-5.2` |
 | 機械式重構 / 批量改名 / 格式統一 / 模式套用 / 成本敏感任務 | **Kimi CLI** | `kimi --print -w <code-dir> -p "..."`（見下方 Kimi CLI 用法備忘） |
-| 複雜整合 / 跨多模組 / E2E 測試 / 高複雜度推理 | **Sonnet 子代理** | `Agent` with `claude-sonnet` |
+| 複雜整合 / 跨多模組 / E2E 測試 / 高複雜度推理 | **Sonnet 子代理** | `Agent(subagent_type="general-purpose", model="sonnet")` |
 | 大型 agentic / openai 模型偏好 / 需沙盒隔離的多檔修改 | **Codex CLI** | `codex exec -C <dir> -s workspace-write "..."` |
 | 1-2 行 hotfix | 主對話 | — |
 
@@ -28,13 +28,13 @@
 | 任務性質 | 派給 | 呼叫 |
 |---------|------|------|
 | 規劃、決策 | 主對話（Opus/Sonnet） | — |
-| 3+ 檔案讀取 / 架構審查 / 結構化摘要 | Haiku 子代理 | `Agent` with `claude-haiku` |
+| 3+ 檔案讀取 / 架構審查 / 結構化摘要 | Haiku 子代理 | `Agent(subagent_type="general-purpose", model="haiku")` |
 | Code Review（diff > 10 行 / 多檔 CR） | Kimi CLI | `kimi -p --print -w <dir>` |
 | 演算法問答 / 第二意見 | Kimi CLI | `kimi -p --print "..."` |
-| 跨檔讀大量 codebase（只分析不寫碼） | Haiku 子代理或 Kimi CLI | `Agent` with `claude-haiku` / `kimi -p --print -w <dir>` |
+| 跨檔讀大量 codebase（只分析不寫碼） | Haiku 子代理或 Kimi CLI | `Agent(subagent_type="general-purpose", model="haiku")` / `kimi -p --print -w <dir>` |
 | 研究外部 API / 文件 | Gemini CLI | `gemini -p "..."` |
 | 批量 100+ 筆非即時查詢 | Gemini Batch | `batch_runner.py` |
-| 文件撰寫（README、註解、CHANGELOG 等非程式碼） | Haiku 子代理 | `Agent` with `claude-haiku` |
+| 文件撰寫（README、註解、CHANGELOG 等非程式碼） | Haiku 子代理 | `Agent(subagent_type="general-purpose", model="haiku")` |
 
 ### Kimi CLI 寫碼用法備忘
 
@@ -66,8 +66,8 @@ codex exec -C src/ -s workspace-write "重構 X 模組..."
 # 完全繞過確認（等同 --yolo，在 CI / 全自動流程用）
 codex exec -C src/ --dangerously-bypass-approvals-and-sandbox "..."
 
-# 指定模型
-codex exec -C src/ -s workspace-write -m o4-mini "..."
+# 指定模型（預設 gpt-5.3-codex，ChatGPT 帳號不支援 o4-mini）
+codex exec -C src/ -s workspace-write -m gpt-5.3-codex "..."
 
 # 從 stdin 讀 prompt（適合 prompt 很長）
 cat prompt.txt | codex exec -C src/ -s workspace-write
