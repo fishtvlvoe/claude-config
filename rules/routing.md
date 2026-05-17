@@ -128,7 +128,31 @@ Claude（PM）→ 企劃、拆任務、驗證、整合
 
 ## Fallback 順序（程式碼撰寫）
 
-Copilot CLI 失敗 → Kimi CLI → Codex CLI → Sonnet 子代理 → 主對話直接寫。切換時主動告知用戶。**永遠不會 fallback 到 Cursor。**
+Copilot CLI → Kimi CLI → Codex CLI → Sonnet 子代理 → 主對話直接寫。**永遠不會 fallback 到 Cursor。**
+
+### 派工後自動驗證（強制，每次派工必跑）
+
+```
+派工完成 → git diff --stat
+         → 檢查三項：
+           1. 有改檔案？（diff 非空）
+           2. 只改該改的？（沒動 openspec/ .claude/ docs/）
+           3. build/test 通過？（npm run build 或對應指令）
+         → 三項全過 = 繼續
+         → 任一不過 = 觸發 fallback
+```
+
+### 自動 Fallback 觸發條件（不問 Fish，靜默切換 + 告知結果）
+
+| 觸發條件 | 動作 |
+|---------|------|
+| CLI exit code ≠ 0（指令本身失敗） | 直接換下一個 |
+| `git diff` 空（執行了但沒改任何檔案） | 換下一個 |
+| 改了不該改的檔案（openspec/ .claude/ docs/） | `git restore .` → 換下一個 + prompt 加強禁令 |
+| 改了檔案但 build/test 失敗 | `git restore .` → 換下一個 |
+| CLI 超時（60 秒無輸出） | kill → 換下一個 |
+
+切換時一行告知：「⚠️ [Copilot] build 失敗，切換 [Kimi] 重做」。不解釋細節、不等確認。
 
 ---
 

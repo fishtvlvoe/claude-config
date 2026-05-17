@@ -44,6 +44,10 @@ trigger: 任務完成 | git commit | session 結束 → 追加一行摘要（格
 trigger: assistant turns 超過 30 次（目測對話已經很長）
 action: 提醒用戶「這個 session 已經很長了，建議 /交接 + /clear 開新 session，避免 context 膨脹推高 Opus 成本」。只提醒一次。
 
+## 功能完成行為驗證（強制，L081）
+trigger: 任何 Wave 完成 | spectra-apply 全部 task done | 功能實作回報「完成」前
+action: **禁止只 build 通過就回報**。MUST 自己實跑驗證：(1) 寫腳本用假資料產出實際檔案（PDF/JSON/圖片）→ 存 `/tmp/`；(2) 或啟動 dev server → Chrome MCP 操作 → 截圖每個關鍵畫面；(3) 或 curl 打 API 確認回傳。截圖/檔案路徑列給 Fish。沒有實際輸出物 = 沒完成。禁止說「請你手動跑一次」。
+
 ## Spectra config.yaml 前置檢查（強制）
 trigger: 執行 `/spectra-propose` | `/spectra-discuss` | `/spectra-ingest` | 任何 Spectra 工作流開始前
 action: 先讀 `openspec/config.yaml`，檢查是否同時有 `context:` 和 `rules:` 且內容非空（非註解模板）。缺任一 → 先補齊 config.yaml 再繼續 Spectra 流程。補齊方式：讀專案的 CLAUDE.md / package.json / README 取得產品定位和 Tech Stack，rules 段落複製 22-AIRE 範本（`/Users/fishtv/Development/22-AIRE/openspec/config.yaml`）再依專案特性調整。完成後告知用戶「config.yaml 已補齊」再進 Spectra。
