@@ -43,9 +43,14 @@
 | L082 | **理解 UI 結構用 DOM/HTML，不用截圖**。截圖 = 圖片 token（每張 ~1500 tokens）+ 「看圖說話」再產文字 = 雙倍浪費。讀 HTML/DOM（`read_page`、`get_page_text`、`javascript_tool` 抓 computed style）= 純文字 token，直接得到 class、px、hex、font-size、佈局，一次到位且精確度更高。鐵律：**給人看的是圖形介面，給 AI 看的是 0 與 1 的介面**。截圖只用於最終視覺驗證（L045），分析結構階段一律讀代碼。 | 任何 UI 偵察/spec 撰寫 |
 | L079 | **寫代碼前 / spectra-apply 前 MUST 跑 cross-impact 分析（A 壞 B 預檢）**。Fish 多次反映：以前修 A 常常把 B 弄壞。觸發：spectra-propose 完成、spectra-apply 開跑前、或直接動程式碼前。動作：派 Sonnet/Haiku 子代理 grep 所有受影響 API/function/DB 表/欄位的 caller 與 consumer，輸出 ABCDEFG 分類報告，每段標 ✅ 無影響 / ⚠️ 需注意 / 🔴 高風險。報告寫到 `/tmp/cross-impact-<change>.md` 給用戶 review。發現 🔴 → STOP，回頭擴大 change 範圍或補對策進 design.md，**禁止硬上**；發現 ⚠️ → 把細節補進 tasks.md 寫成明文步驟（例：「合併邏輯第一次見 product 怎麼建、已存在怎麼累加、subItems 內 variation 怎麼分組」這種步驟級規範），不是嘴上講一下就跳過。實際應用範例：fix-shipment-details-expand-variations 預檢抓到 `mergeItemsByProduct` 的 `{...item}` spread 會讓 parent 欄位被最後一筆覆蓋，補進任務 3.1。**補強規則（2026-05-16 hotfix 1.7.12 踩坑後加）：改任何 REST API 行為前 MUST 先從前端往後 trace — `grep "fetch.*<endpoint>" `、`grep "/<resource>/"` 在 `includes/views/`、`admin/js/`、`admin/partials/` 找實際被打的 URL → 對應後端 handler → 改對 handler**。光看 service method caller 不夠，可能 service method 根本沒被 REST endpoint 用到（例如 fix-shipment-details-expand-variations 改了 `/shipments/{id}` 用的 `get_shipment_items`，但前端打的是 `/shipments/{id}/detail` 用 `get_shipment_detail` 獨立 SQL → 部署後子列不顯示 → 開 hotfix v1.7.12 補修 detail endpoint）。 | spectra-apply 前 / 任何寫代碼前 |
 
+| L083 | **supastarter-first（先查底盤，無例外）**。收到任何 SR/SDD 任務，寫代碼前強制前置步驟：(1) 查 `supastarter-nextjs/` 有沒有現成頁面/元件；(2) 查 supastarter.dev 開發文件；(3) 查 `packages/` 12 個共用套件有沒有可用的；(4) 產出「可用資源清單」給 Fish：直接用 / 改一點 / 需新寫；(5) Fish 確認後才動手。**禁止**：跳過查詢直接設計方案。supastarter 是成品底盤，不是參考資料。anismile-bugfix-round2 的 14 個 bug 中 40% 來自沒用底盤現成功能。 | 任何 SR/SDD 動工前 |
+| L084 | **reuse-first（先考古再動手，無例外）**。寫任何代碼前強制前置步驟：(1) grep 現有 `apps/` 找類似 pattern；(2) 查同產品或其他產品的 archived changes（已解過的問題）；(3) 確認 API procedure 是否已存在（禁止只做 UI 外殼不接 API）；(4) 主動告訴 Fish：「這些不用做、這些直接用、只有這些要新寫」。**禁止**：從頭寫已有的東西、只做靜態 UI 沒接 API 就標「完成」。 | 任何寫碼任務開始前 |
+| L085 | **完整派工 + 自己驗收（不丟球給 Fish，無例外）**。派工時：prompt 必須附 `ui-reference/` 路徑 + spec 路徑 + HTML demo 路徑，明確寫「按照這三份文件實作，不可自由發揮」。測試時：自己用 Chrome MCP 跑完所有頁面 + 讀 console + 截圖，一次跑完、一次報告全部問題 + 建議解法。對話中：重要資訊立刻寫進 spec/design.md，不靠對話記憶。**禁止**：叫 Fish 開瀏覽器/截圖/貼報錯、問 Fish 已回答過的問題。 | 派工/測試/對話中 |
+
 ## 變更歷程
 
 - 2026-05-15: 從 61 條拆分為核心 + 4 領域檔案，本檔保留 26 條（24 原 + L077 風格衝突 + L078 存檔點）
 - 2026-05-15: 新增 L079 cross-impact 預檢（A 壞 B 預防）
 - 2026-05-16: 新增 L080 sr 縮寫
 - 2026-05-17: 新增 L081 驗證必須實跑（build≠功能正確，禁止丟回 Fish）
+- 2026-05-18: 新增 L083 supastarter-first、L084 reuse-first、L085 完整派工+自己驗收（opcOS 願景討論產出）

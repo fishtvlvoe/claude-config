@@ -96,6 +96,17 @@ Fish（架構師）→ 方向、邊界、裁決
 
 寫碼 > 5 行 → 派 Copilot CLI / Kimi CLI / Codex CLI / Sonnet 子代理（**Cursor 全面禁用**）。讀大量檔案 → 派 Haiku 或 Kimi。外部研究 → gemini CLI。完整路由 → `~/.claude/rules/routing.md`。
 
+## 術語速查
+
+| 他說的 | 意思 |
+|--------|------|
+| 「oo」 | opcos（母站 opcos.me） |
+| 「sr」 | Spectra SDD 專案（已有 L080） |
+| 「opcOS SDK」 | 我們自建的代碼包（Phase 2 對外用） |
+| 「ST」 | supastarter monorepo（內部開發用） |
+| 「底盤」 | supastarter 提供的基礎設施 |
+| 「子服務」 | opcOS 底下的獨立產品（AIRE、anismile 等） |
+
 ## 迭代記錄
 
 | 日期 | 問題 | 學到的 |
