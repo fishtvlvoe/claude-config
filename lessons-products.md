@@ -27,3 +27,14 @@
 | L063 | `next build` 在 standalone 模式會把部分 npm 套件做成 symlink 放到 `.next/standalone/.next/node_modules/`（如 pdfjs-dist），electron-builder packaging 階段對 symlink stat 會 ENOENT 失敗。正解：next build 之後、electron-builder 之前，跑 `node scripts/materialize-standalone-symlinks.js` 把 symlink 攤平成實體檔案。 | Electron + Next.js standalone packaging |
 | L064 | electron-builder Mac 同時 build arm64 + x64 時，artifactName 沒設 `${arch}` → 兩個 dmg 同名 → 後 build 的 x64 覆蓋掉 arm64。GitHub Releases log 看到 `overwrite published file ... reason=already exists` 就是這個。正解：`mac.artifactName: "${name}-${version}-${arch}.${ext}"`。 | electron-builder 多 arch dmg |
 | L065 | electron-updater 的 `provider: 'generic'` + 自訂 license-server URL 會綁死部署位址。改 GitHub Releases 後若 updater code 沒同步改成 `provider: 'github'`，舊版客戶會永遠檢查不到新版。正解：electron-builder.json 的 publish 跟 electron/updater.ts 的 setFeedURL 必須同時改、同一個 commit。 | electron-updater + publish provider |
+
+## anismile / supastarter
+
+| # | 規則 | 觸發情境 |
+|---|------|---------|
+| L083 | **supastarter-first（先查底盤，無例外）**。收到任何 SR/SDD 任務，寫代碼前強制前置步驟：(1) 查 `supastarter-nextjs/` 有沒有現成頁面/元件；(2) 查 supastarter.dev 開發文件；(3) 查 `packages/` 12 個共用套件有沒有可用的；(4) 產出「可用資源清單」給 Fish：直接用 / 改一點 / 需新寫；(5) Fish 確認後才動手。**禁止**：跳過查詢直接設計方案。supastarter 是成品底盤，不是參考資料。anismile-bugfix-round2 的 14 個 bug 中 40% 來自沒用底盤現成功能。 | 任何 SR/SDD 動工前 |
+| L086 | **底層先修，新功能後加（foundation-first，無例外）**。發現 ST 底盤元件與 anismile 自寫版本重疊時，**必須先替換底層元件，才能繼續加新功能**。原因：新功能如果建在自寫版元件上，之後替換底層時會做 A 壞 B——舊自寫版的行為、props 介面、型別定義可能跟 ST 版不同，改了底層新功能就跟著爛。順序：(1) 讀 `docs/st-overlap-analysis.md` 確認所有 ✅ 可直接換掉的項目；(2) 先做全部替換並通過測試；(3) build 乾淨才進新功能。**禁止**：「先快速加新功能，回頭再換底層」。新功能建在錯誤底層 = 雙倍工。 | 有 ST 元件重疊存在時，任何新功能動工前 |
+
+## 變更歷程
+
+- 2026-05-19: 從 lessons.md 收 L083 / L086（supastarter-first / 底層先修）

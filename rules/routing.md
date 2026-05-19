@@ -1,97 +1,48 @@
-# 路由速查表（精簡版）
+# 路由速查表
 
-> 詳細規則、例子、完整呼叫方式 → 需要時 Read `~/.claude/reference/routing-full.md`
+> 細節（CLI 用法、CR 三層、Fallback 觸發） → `Read ~/.claude/reference/routing-details.md`
 
 ## 🔴 硬規則（不可違反）
 
-1. **Spectra 強制入口**：執行類任務 → `/spectra-*`，禁止用 TaskCreate/TodoList 替代
-2. **外顯路由**：每個任務第一句話說「路由：X，派 Y」
+1. **Spectra 強制入口**：執行類任務 → `/spectra-*`，禁用 TaskCreate/TodoList 替代
+   - SDD Apply 預設 **Sonnet 子代理**（成本 1/4 Opus，複雜度足）
+   - 升 Opus 條件 → 見 `spectra-agent-routing.md`
+2. **外顯路由**：每個任務第一句說「派 X，因為 Y」
 3. **超過 5 行代碼 → 派外部 Agent**，不自己寫
-4. **程式碼撰寫只能派 Copilot CLI、Kimi CLI、Codex CLI 或 Sonnet 子代理**（無例外）。其他工具（Cursor、Gemini、Haiku）一律不准寫程式碼
-5. **研究 / 網路查詢 → 派 Gemini / Kimi CLI**，Claude 子代理沒上網能力
+4. **寫碼只能派 Copilot / Kimi / Codex CLI 或 Sonnet 子代理**（無例外），Cursor/Gemini/Haiku 不准寫碼
+5. **研究 / 網路查詢 → Gemini / Kimi CLI**，Claude 子代理無上網
 6. **說工具「不能用」前 → 先 `which <tool>` 確認**
 
-## 路由速查表
+## 速查表
 
-### ✅ 程式碼撰寫（只能用以下三個）
+### ✅ 程式碼撰寫
 
 | 任務性質 | 派給 | 呼叫 |
 |---------|------|------|
-| 業務邏輯 / API / 測試 / UI 元件 / scaffold / 簡單修改 | **Copilot CLI** | `copilot -p --yolo --model gpt-5.2` |
-| 機械式重構 / 批量改名 / 格式統一 / 模式套用 / 成本敏感任務 | **Kimi CLI** | `kimi --print -w <code-dir> -p "..."`（見下方 Kimi CLI 用法備忘） |
-| 複雜整合 / 跨多模組 / E2E 測試 / 高複雜度推理 | **Sonnet 子代理** | `Agent(subagent_type="general-purpose", model="sonnet")` |
-| 大型 agentic / openai 模型偏好 / 需沙盒隔離的多檔修改 | **Codex CLI** | `codex exec -C <dir> -s workspace-write "..."` |
+| 業務邏輯 / API / 測試 / UI / 簡單修改 | **Copilot CLI** | `copilot -p --yolo --model gpt-5.2` |
+| 機械式重構 / 批量改名 / 成本敏感 | **Kimi CLI** | `kimi --print -w <code-dir> -p "..."` |
+| 複雜整合 / 跨多模組 / E2E | **Sonnet 子代理** | `Agent(subagent_type="general-purpose", model="sonnet")` |
+| 大型 agentic / 沙盒隔離多檔 | **Codex CLI** | `codex exec -C <dir> -s workspace-write "..."` |
 | 1-2 行 hotfix | 主對話 | — |
 
-### 🔍 非程式碼撰寫（分析、研究、審查、雜事）
+### 🔍 非程式碼（分析、研究、審查）
 
 | 任務性質 | 派給 | 呼叫 |
 |---------|------|------|
-| 規劃、決策 | 主對話（Opus/Sonnet） | — |
-| 3+ 檔案讀取 / 架構審查 / 結構化摘要 | Haiku 子代理 | `Agent(subagent_type="general-purpose", model="haiku")` |
-| Code Review（diff > 10 行 / 多檔 CR） | Kimi CLI | `kimi -p --print -w <dir>` |
+| 規劃 / 決策 | 主對話（Opus/Sonnet） | — |
+| 3+ 檔案讀取 / 結構化摘要 / 文件撰寫 | Haiku 子代理 | `Agent(subagent_type="general-purpose", model="haiku")` |
+| Code Review（diff > 10 行） | Kimi CLI | `kimi -p --print -w <dir>` |
 | 演算法問答 / 第二意見 | Kimi CLI | `kimi -p --print "..."` |
-| 跨檔讀大量 codebase（只分析不寫碼） | Haiku 子代理或 Kimi CLI | `Agent(subagent_type="general-purpose", model="haiku")` / `kimi -p --print -w <dir>` |
 | 研究外部 API / 文件 | Gemini CLI | `gemini -p "..."` |
-| 批量 100+ 筆非即時查詢 | Gemini Batch | `batch_runner.py` |
-| 文件撰寫（README、註解、CHANGELOG 等非程式碼） | Haiku 子代理 | `Agent(subagent_type="general-purpose", model="haiku")` |
+| 批量 100+ 非即時查詢 | Gemini Batch | `batch_runner.py` |
 
-### Kimi CLI 寫碼用法備忘
+### ❌ 禁用工具
 
-```bash
-# 標準寫碼派工（-w 只指程式碼目錄，不指專案根）
-kimi --print -w src/ -p "重構 X 模組... 只修改 src/ 下的檔案，禁止動 openspec/、.claude/、docs/"
+| 工具 | 範圍 | 替代 |
+|------|------|------|
+| **cursor-agent** | 全面禁用 | UI → Copilot；複雜 → Sonnet/Codex；偵察 → 主對話 Grep |
 
-# 複雜任務先規劃再執行
-kimi --print --plan -w src/ -p "..."
-
-# 限制步數防失控（預設由 config 決定）
-kimi --print --max-steps-per-turn 20 -w src/ -p "..."
-
-# 只拿最終結果（省 log 噪音，適合串接腳本）
-kimi --quiet -w src/ -p "..."
-
-# 需要讀額外目錄但不改（如讀 types/ 參考但只改 src/）
-kimi --print -w src/ --add-dir types/ -p "..."
-```
-
-**防護 SDD 檔案**（L069）：派工前先 `git add openspec/ .claude/ && git commit`；`-w` 只指程式碼目錄；prompt 結尾加禁令；派工後 `git diff --stat` 檢查。
-
-### Codex CLI 寫碼用法備忘
-
-```bash
-# 標準非互動派工（workspace-write = 只能改工作目錄）
-codex exec -C src/ -s workspace-write "重構 X 模組..."
-
-# 完全繞過確認（等同 --yolo，在 CI / 全自動流程用）
-codex exec -C src/ --dangerously-bypass-approvals-and-sandbox "..."
-
-# 指定模型（預設 gpt-5.3-codex，ChatGPT 帳號不支援 o4-mini）
-codex exec -C src/ -s workspace-write -m gpt-5.3-codex "..."
-
-# 從 stdin 讀 prompt（適合 prompt 很長）
-cat prompt.txt | codex exec -C src/ -s workspace-write
-
-# 多工並行：不同目錄可同時跑（shell 背景執行）
-codex exec -C apps/web -s workspace-write "改 UI" &
-codex exec -C apps/api -s workspace-write "改 API" &
-wait
-```
-
-**Codex × Claude Code 多工串接模式**：
-- Claude（PM）把任務拆成「不同目錄/不同檔案」的工作包
-- 同一訊息用多個 Bash tool call 並行 dispatch `codex exec &`
-- 所有 Codex 任務完成後 Claude 統一 `git diff --stat` 驗收 → CR → commit
-
-**防護 SDD 檔案**：同 L069/L050 — 派工前先 `git add openspec/ .claude/ && git commit`；`-C` 只指程式碼目錄；prompt 結尾加「禁止動 openspec/、.claude/、docs/」。
-
-### ❌ 禁用工具（品質不穩，永不派工）
-
-| 工具 | 禁用範圍 | 替代方案 |
-|------|---------|---------|
-| **cursor-agent** | 全面禁用（不寫 UI、不 scaffold、不本機偵察） | UI → Copilot；複雜元件 → Sonnet / Codex；偵察 → 主對話 Grep/Glob |
-
-**例外**：Fish 明確點名要用 Cursor 做某件事 → 才用，否則一律不准。
+例外：Fish 明確點名才用。
 
 ## 工作流層級
 
@@ -101,60 +52,26 @@ Claude（PM）→ 企劃、拆任務、驗證、整合
 外部 Agent（實習生）→ 執行小任務
 ```
 
-**實習生任務原則**：輸入清楚 + 輸出格式定好 + 粒度小 + 不需推理判斷。違反 → 留在主對話處理。
+實習生任務原則 → `reference/routing-details.md`
 
-## 代碼審核三層（任何 diff > 10 行，強制）
+## 代碼審核三層（diff > 10 行強制）
 
-1. **CR 並行矩陣** → **同一訊息並行派 3 個 subagent**（每個戴不同濾鏡全讀 diff）：
-   - `correctness-auditor` — 只看邏輯錯誤、邊界條件、型別誤用
-   - `security-lens` — 只看 OWASP / 注入 / 權限 / WP nonce
-   - `performance-auditor` — 只看 N+1 / 迴圈 IO / 記憶體 / 缺快取
-   - 三份報告回來後主對話整合，派 Copilot 一次修
-   - 備用：跨檔（3+ 檔案）改用 Kimi CLI `kimi -p --print -w <dir>`
+1. **CR 並行矩陣**：同訊息派 3 個 subagent — correctness-auditor / security-lens / performance-auditor
 2. **Debug** → Sonnet 子代理或主對話
-3. **Coverage** → Copilot CLI 跑 `--coverage`，目標 > 80%
+3. **Coverage** → Copilot CLI `--coverage`，> 80%
 
-## 並行 vs 單派決策表
+細節（並行條件、跨檔備用方案） → `reference/routing-details.md`
 
-| 任務 | 並行？ | 條件 |
-|------|-------|------|
-| 審查 | ✅ | 同檔多濾鏡（correctness / security-lens / performance） |
-| 寫碼 | ⚠️ | 只有「不同檔案」才並行（同檔會打架） |
-| 研究 | ⚠️ | 只有「不同主題」才並行（同主題合併一次問） |
-| 設計 | ❌ | 單一 Copilot 或 Sonnet 子代理（一致性優先） |
-| 搜檔 | ❌ | 單一 Explore 或 Grep（並行無意義） |
+## 並行原則
 
-原則：**任務之間無交互依賴 → 才並行**。
+任務之間無交互依賴 → 才並行。
+- 審查 ✅ 同檔多濾鏡
+- 寫碼 ⚠️ 只有不同檔案
+- 研究 ⚠️ 只有不同主題
+- 設計 / 搜檔 ❌
 
-## Fallback 順序（程式碼撰寫）
+## Fallback（寫碼）
 
-Copilot CLI → Kimi CLI → Codex CLI → Sonnet 子代理 → 主對話直接寫。**永遠不會 fallback 到 Cursor。**
+Copilot → Kimi → Codex → Sonnet 子代理 → 主對話。**永不 fallback 到 Cursor**。
 
-### 派工後自動驗證（強制，每次派工必跑）
-
-```
-派工完成 → git diff --stat
-         → 檢查三項：
-           1. 有改檔案？（diff 非空）
-           2. 只改該改的？（沒動 openspec/ .claude/ docs/）
-           3. build/test 通過？（npm run build 或對應指令）
-         → 三項全過 = 繼續
-         → 任一不過 = 觸發 fallback
-```
-
-### 自動 Fallback 觸發條件（不問 Fish，靜默切換 + 告知結果）
-
-| 觸發條件 | 動作 |
-|---------|------|
-| CLI exit code ≠ 0（指令本身失敗） | 直接換下一個 |
-| `git diff` 空（執行了但沒改任何檔案） | 換下一個 |
-| 改了不該改的檔案（openspec/ .claude/ docs/） | `git restore .` → 換下一個 + prompt 加強禁令 |
-| 改了檔案但 build/test 失敗 | `git restore .` → 換下一個 |
-| CLI 超時（60 秒無輸出） | kill → 換下一個 |
-
-切換時一行告知：「⚠️ [Copilot] build 失敗，切換 [Kimi] 重做」。不解釋細節、不等確認。
-
----
-
-> 細節（WBS 拆任務原則、Opus/Sonnet 自律 Checklist、完整模型分工表、審核流程細節、fallback 觸發條件）
-> → `Read ~/.claude/reference/routing-full.md`
+派工後自動驗證 + Fallback 觸發條件 → `reference/routing-details.md`
