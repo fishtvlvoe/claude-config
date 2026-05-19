@@ -60,8 +60,12 @@ openspec/.vector-search.db*
 
 # Archived files (local backup only)
 _archived_*/
+<<<<<<< Updated upstream
 gsd-local-patches/
 plans/
 schemas/
 transcripts/
 skills-snapshot/對焦/
+=======
+graphify-out/
+>>>>>>> Stashed changes
