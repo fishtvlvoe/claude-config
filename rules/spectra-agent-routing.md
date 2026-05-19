@@ -3,6 +3,27 @@
 > 代理速查表、禁用清單、分類規則 → `~/.claude/rules/routing.md`（SSOT）
 > 詳細案例、SOP → `~/.claude/reference/spectra-agent-routing-full.md`
 
+## SDD 模型選擇（成本優化，2026-05-19）
+
+**原則**：Phase 分層模型 —— Opus 做決策層，Sonnet/CLI 做執行層
+
+| Phase | 用途 | 模型 | 成本 | 
+|-------|------|------|------|
+| 1（規劃） | Discuss / Propose | **Opus** | $60-80 |
+| 2（TDD） | 紅燈測試 | Sonnet 子代理 | $15-20 |
+| 3（實作） | 代碼撰寫 | Copilot/Kimi CLI | $10-20 |
+| 4（Review） | CR 驗證 | Kimi CLI | $5-10 |
+| 5（驗收） | E2E 測試 + 部署 | Sonnet 子代理 | $10-15 |
+| **合計** | **整個 phase** | **混合** | **$150-200**（vs. 全 Opus $400+） |
+
+**SDD Apply 預設**：用 **Sonnet 子代理**（複雜度足，成本 1/4）
+
+**升 Opus 的條件**（任一符合）：
+- 架構決策題（上 /spectra-discuss → Opus）
+- 跨棧重構（3+ 層改動）
+- 文件變更 > 10 個
+- 模型主觀判斷：「這很複雜，需要深思」
+
 ## 工作包合併原則
 
 **不要拆太碎**（例如「修 API / 寫測試 / 再修 API」分三份）

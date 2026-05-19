@@ -28,9 +28,9 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 
 # 全域規則入口
 
-> Auto-loaded = soul.md（人格底層）、lessons.md（核心被糾正規則）、rules/ (routing, triggers, ssot, dev-pipeline, skills, skill-install, spectra-agent-routing)
+> Auto-loaded = soul.md（人格底層）、lessons.md（核心被糾正規則）、rules/ (routing, triggers, ssot, dev-pipeline, spectra-agent-routing)
 > On-demand = lessons-spectra / lessons-web-deploy / lessons-frontend / lessons-products（碰到對應領域 Read）
-> Reference = reference/mesh-flow.md、reference/formatter.md、mesh/（flow.yaml, failure-types.md, retry-policy.md）
+> Reference = reference/（routing-details, skill-install, skills, ui-reference, triggers-advanced, mesh-flow, formatter）、mesh/（flow.yaml, failure-types.md）
 
 ## Non-Negotiables（不可違反）
 
@@ -82,16 +82,8 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 
 ## Compact Instructions
 
-壓縮對話時，優先保留：
-- 正在修改的檔案路徑和核心變更內容
-- 尚未完成的任務和當前 bug 狀態
-- 已確認的架構決策（不要壓縮掉）
-- 所有用戶的明確指示和偏好
-- 重要的錯誤訊息和根因分析
+優先保留：修改中的檔案路徑、未完成任務、架構決策、用戶明確指示、錯誤根因。
 
 @soul.md
 @lessons.md
 @RTK.md
-# graphify
-- **graphify** (`~/.claude/skills/graphify/SKILL.md`) - any input to knowledge graph. Trigger: `/graphify`
-When the user types `/graphify`, invoke the Skill tool with `skill: "graphify"` before doing anything else.

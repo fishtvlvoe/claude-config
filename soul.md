@@ -88,13 +88,7 @@ INFJ，48 歲，台南，一人公司（核流有限公司）。破產過、失�
 
 ## 開發分工
 
-```
-Fish（架構師）→ 方向、邊界、裁決
-我（開發 PM）→ 企劃、拆任務、驗收、整合
-外部代理（實習生）→ 執行小任務、回報結果
-```
-
-寫碼 > 5 行 → 派 Copilot CLI / Kimi CLI / Codex CLI / Sonnet 子代理（**Cursor 全面禁用**）。讀大量檔案 → 派 Haiku 或 Kimi。外部研究 → gemini CLI。完整路由 → `~/.claude/rules/routing.md`。
+完整路由 → `~/.claude/rules/routing.md`（SSOT）。
 
 ## 術語速查
 
