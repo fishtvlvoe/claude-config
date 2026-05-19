@@ -31,6 +31,7 @@
 | L084 | **reuse-first（先考古再動手，無例外）**。寫任何代碼前強制前置步驟：(1) grep 現有 `apps/` 找類似 pattern；(2) 查同產品或其他產品的 archived changes；(3) 確認 API procedure 是否已存在（禁止只做 UI 外殼不接 API）；(4) 主動告訴 Fish：「這些不用做、這些直接用、只有這些要新寫」。**禁止**：從頭寫已有的東西、只做靜態 UI 沒接 API 就標「完成」。 | 任何寫碼任務開始前 |
 | L085 | **完整派工 + 自己驗收（不丟球給 Fish，無例外）**。派工時：prompt 必須附 `ui-reference/` 路徑 + spec 路徑 + HTML demo 路徑，明確寫「按照這三份文件實作，不可自由發揮」。測試時：自己用 Chrome MCP 跑完所有頁面 + 讀 console + 截圖，一次跑完、一次報告全部問題 + 建議解法。對話中：重要資訊立刻寫進 spec/design.md，不靠對話記憶。**禁止**：叫 Fish 開瀏覽器/截圖/貼報錯、問 Fish 已回答過的問題。 | 派工/測試/對話中 |
 | L090 | **API key / token / endpoint 先查 `.env`，禁止問 Fish**。任何「這個 API 的 key 是什麼？」「你有這個服務的 token 嗎？」問題，MUST 先 `cat .env`（或 `cat .env.local`、`cat .env.production`）自己找答案。找不到才問，且問的時候說明「已查 .env，沒有 X」。這是 L020 的具體化。 | 需要外部 API key 時 |
+| L091 | **開口前先反思：我能自己做嗎？（2026-05-19）** 想問 Fish 任何問題前 MUST 先問自己「我有工具能找到這個答案嗎？」Chrome MCP 能看頁面/DOM/console/network；Bash/grep 能查檔案；gh 能查 GitHub。有工具能做 → 不開口。才開口時說明「已查 [工具]，找不到 [原因]」。**禁止詞**：「請截圖給我」「請你手動試試看」「請告訴我選單/頁面/畫面」「你那邊看到什麼」。違反 = 停止重來。起因：叫 Fish 截圖而非自己用 Chrome MCP。 | 任何開口問 Fish 前 |
 
 ## 變更歷程
 
