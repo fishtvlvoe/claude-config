@@ -17,8 +17,10 @@
 | L089 | **操作前先 `read_page filter=interactive` 取得所有 ref，再一次 batch 完成所有動作**。分多次 `find` → `click` 造成 ref 失效、多餘 round-trip。正確流程：`read_page` → 從輸出取所有需要的 ref → 一個 `browser_batch` 完成填表+點擊+等待。 | Chrome MCP 效率 |
 | L019 | UI 按鈕/圖示一律用 SVG icon（Heroicons/Lucide），禁止 Emoji | UI 設計 |
 | L045 | UI 任務（HTML 原型、React 元件、CSS 改動）commit 前 MUST 跑視覺驗證：用 playwright/chrome MCP 截圖每個畫面或狀態 → 主對話 Read 截圖確認渲染對 → 錯誤就退回 Agent 改。**禁止**「Agent 回報完成 + grep 字串存在」就 commit。理由：字面驗證 ≠ 行為驗證，HTML 結構正確不代表瀏覽器渲染對。 | 任何 UI 任務 commit 前 |
-| L046 | 派工給 cursor-agent / Sonnet 子代理做 UI 時，prompt 結尾 MUST 加：「完成後用 playwright 截圖每個畫面/狀態存到 /tmp/，把路徑列出，不要說『完成』，說『截圖在 X 請主對話驗證』」。沒附截圖證據 = 退回重做。 | 派工 UI 任務時 |
+| L046 | 派工給 Sonnet 子代理做 UI 時，prompt 結尾 MUST 加：「完成後用 playwright 截圖每個畫面/狀態存到 /tmp/，把路徑列出，不要說『完成』，說『截圖在 X 請主對話驗證』」。沒附截圖證據 = 退回重做。 | 派工 UI 任務時 |
+| L092 | **自己驗證 UI 用 DOM，不用截圖**。Chrome MCP `javascript_tool` 查 DOM 結構、img.src、class、scrollWidth 等，不跑 `computer screenshot`。例外：Fish 明確指出 UI 問題（排版/顏色/視覺 bug）且需要目視確認時，才截圖。截圖需要額外 token 處理，DOM 查詢更快更省。 | Chrome MCP 自驗 UI |
 | L082 | **理解 UI 結構用 DOM/HTML，不用截圖**。截圖 = 圖片 token（每張 ~1500 tokens）+「看圖說話」再產文字 = 雙倍浪費。讀 HTML/DOM（`read_page`、`get_page_text`、`javascript_tool` 抓 computed style）= 純文字 token，直接得到 class、px、hex、font-size、佈局。鐵律：**給人看的是圖形介面，給 AI 看的是 0 與 1 的介面**。截圖只用於最終視覺驗證（L045），分析結構階段一律讀代碼。 | 任何 UI 偵察/spec 撰寫 |
+| L092 | **按鈕文字顏色禁止使用 muted / stone-400 / stone-500 層級，最低 stone-600 / foreground**。anismile 案例：Button `outline` variant 誤用 `text-secondary`（灰），原生 `<button>` 誤用 `text-stone-400`，造成低對比度可讀性問題。規則：(1) `@repo/ui` Button `outline` variant 用 `text-foreground`；(2) 任何原生 `<button>` 的文字 class 最低用 `text-stone-600`，hover 最低 `text-stone-900`；(3) 關閉/次要操作按鈕（X icon）也不例外——灰色 icon 不等於可接受的低對比度。 | 任何 Button / button 元件撰寫 |
 
 ## 變更歷程
 

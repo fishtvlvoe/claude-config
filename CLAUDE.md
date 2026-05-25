@@ -28,7 +28,7 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 
 # 全域規則入口
 
-> Auto-loaded = soul.md（人格底層）、lessons.md（核心被糾正規則）、rules/ (routing, triggers, ssot, dev-pipeline, spectra-agent-routing)
+> Auto-loaded = soul.md（人格底層）、lessons.md（核心被糾正規則）、rules/ (routing, triggers, ssot, opcos-dev-guide)
 > On-demand = lessons-spectra / lessons-web-deploy / lessons-frontend / lessons-products（碰到對應領域 Read）
 > Reference = reference/（routing-details, skill-install, skills, ui-reference, triggers-advanced, mesh-flow, formatter）、mesh/（flow.yaml, failure-types.md）
 

@@ -1,6 +1,7 @@
 # 研究路由詳細規則
 
 > 從 Development/CLAUDE.md 抽出，研究任務觸發時再載入。
+> 2026-05-25 更新：停用 Gemini CLI，改用 WebSearch/WebFetch MCP。
 
 ## 關鍵字觸發（對話中出現以下詞語）
 - 「查一下」、「查查」、「幫我查」
@@ -19,23 +20,13 @@
 - 套件 / 外掛最新版本或 changelog
 - 問題答案可能在過去 1 年內有變動
 
-## Gemini CLI 呼叫方式
-`PATH="$HOME/.nvm/versions/node/v22.19.0/bin:/opt/homebrew/bin:$PATH" gemini -p "prompt"`
+## 研究工具
 
-## 不適合 Gemini 的任務（改用其他模型）
-- 寫程式碼、修 bug → Sonnet
-- 分析本地 codebase → Kimi
+**WebSearch MCP**：關鍵字搜尋、競品調查、最新資訊
+**WebFetch MCP**：直接抓取指定 URL 的文件內容、API 規格頁
+**Kimi MCP `kimi_query`**：純技術推理、演算法問答、不需要網路的深度分析
+
+## 不適合研究工具的任務（改用其他模型）
+- 寫程式碼、修 bug → Sonnet 子代理
+- 分析本地 codebase → Kimi MCP `kimi_analyze`
 - 規劃 / 架構決策 → Opus（主對話）
-
-## Gemini Batch API（大量批量處理）
-觸發條件：任務筆數 > 100 且非即時需求（可等 4-24 小時）
-- 比同步 API **便宜 50%**
-- 工具：`python tools/gemini-batch/batch_runner.py --input requests.jsonl`
-- Dry run 測試：`python tools/gemini-batch/batch_runner.py --dry-run`
-- 適用：Migration 批量生成、大量文件分類、批量翻譯
-
-## Gemini CLI 重複執行模式
-觸發條件：重複性高、機械性、腳本可循環的工作
-- 走免費 dev 配額（Google 帳號登入），0 額外成本
-- 呼叫：`gemini -p "..." --yolo`（搭配 shell 腳本循環）
-- 適用：Playwright 爬取批跑、重複生成腳本、大量格式轉換

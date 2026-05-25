@@ -115,13 +115,13 @@ Halt 後等用戶指示，不自行繼續。
 |------|---------|-------------|
 | routing.md | 誰做（模型分工） | 不衝突，Mesh 不管誰做 |
 | Spectra | 文件管理（propose → apply → archive） | 不衝突，Mesh 管的是失敗時怎麼退 |
-| dev-pipeline.md | Phase 順序（規劃→TDD→實作→Review→驗收） | 不衝突，Mesh 補充每個 Phase 內的回退邏輯 |
+| routing.md（開發 Phase 職責段） | Phase 順序（規劃→TDD→實作→Review→驗收） | 不衝突，Mesh 補充每個 Phase 內的回退邏輯 |
 | formatter.md | 格式檢查 | 對應 Mesh 的 format_check 步驟 |
 
 ---
 
 ## 判定責任
 
-- **Review 層**（Kimi / Codex / GitHub Copilot）：判定失敗類型
+- **Review 層**（Kimi MCP / Codex CLI / Sonnet 子代理）：判定失敗類型
 - **主對話**：執行回退，不自行改變 Review 層的判定
 - **禁止**：主對話跳過回退直接繼續、主對話自己改 failure_type

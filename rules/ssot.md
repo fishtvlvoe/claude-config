@@ -4,24 +4,21 @@
 
 | 資訊類型 | 唯一歸屬（寫這裡） | 禁止寫到 |
 |---------|-------------------|---------|
-| 今日進度 | `memory/today.md` | claude-mem（claude-mem 只用於跨日搜尋） |
-| 全局技術教訓 | `memory/lessons.md` | today.md、CLAUDE.md 註解、claude-mem |
-| 開發類教訓 | `memory/lessons-dev.md` | lessons.md（領域專注，不混入） |
-| 判斷案例 | `memory/judgment-cases.md` | lessons.md（踩坑 ≠ 判斷） |
-| 專案戰略狀態 | `memory/projects.md` | today.md（today = 當日進度，不是狀態） |
-| 環境/SSH/部署 | `memory/environment.md` | CLAUDE.md `<conn>`（conn 只放指令事實） |
+| 今日進度 | `~/.claude/memory/today.md` | claude-mem（claude-mem 只用於跨日搜尋） |
+| 全局技術教訓 | `~/.claude/lessons.md` | today.md、CLAUDE.md 註解、claude-mem |
+| 開發類教訓 | `~/.claude/lessons-dev.md` | lessons.md（領域專注，不混入） |
+| 前端類教訓 | `~/.claude/lessons-frontend.md` | lessons.md |
+| Spectra 類教訓 | `~/.claude/lessons-spectra.md` | lessons.md |
 | 待辦事項 | Linear（長期追蹤）+ GSD todos（開發中短期） | memory 檔案（待辦不是記憶） |
 | 外掛開發指引 | 各外掛 `CLAUDE.md` | 全域 CLAUDE.md（全域只放跨專案規則） |
 | 工作流規則 | `~/.claude/CLAUDE.md` → `rules/` | memory 檔案（規則不是記憶） |
 | Skill 開發紀錄 | 各 Skill 的 `SKILL.md` | memory 檔案 |
 | 跨日記憶/搜尋 | claude-mem | today.md（today 隔天清空） |
-| Flow 定義 | `mesh/flow.yaml` | rules/ 檔案（具體 flow 見 mesh/flow.yaml） |
-| 失敗類型定義 | `mesh/failure-types.md` | 其他 memory 檔案 |
-| 任務歷史 | `memory/task-history/` | 其他位置 |
-| 失敗模式 | `memory/failure-patterns/` | 其他位置 |
-| 工作流參考 | `memory/workflow.md` | lessons.md、today.md（參考資料不是教訓） |
-| Token 策略 | `memory/token-optimization.md` | lessons.md（技術決策不是踩坑） |
-| 產品目錄 | `memory/products-directory.md` | projects.md（目錄 ≠ 戰略） |
+| Flow 定義 | `~/.claude/mesh/flow.yaml` | rules/ 檔案（具體 flow 見 mesh/flow.yaml） |
+| 失敗類型定義 | `~/.claude/mesh/failure-types.md` | 其他 memory 檔案 |
+| 任務歷史 | `~/.claude/memory/task-history/` | 其他位置 |
+| 失敗模式 | `~/.claude/memory/failure-patterns/` | 其他位置 |
+| Token 策略 | `~/.claude/memory/token-optimization.md` | lessons.md（技術決策不是踩坑） |
 
 policy: 寫任何資訊前，先查 SSOT 表確認歸屬，寫錯地方 = 違規
 policy: 發現同一資訊出現在兩處 → 保留 SSOT 歸屬的那份，刪除另一份

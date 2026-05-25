@@ -5,29 +5,6 @@
 
 ---
 
-## Kimi CLI 寫碼用法備忘
-
-```bash
-# 標準寫碼派工（-w 只指程式碼目錄，不指專案根）
-kimi --print -w src/ -p "重構 X 模組... 只修改 src/ 下的檔案，禁止動 openspec/、.claude/、docs/"
-
-# 複雜任務先規劃再執行
-kimi --print --plan -w src/ -p "..."
-
-# 限制步數防失控（預設由 config 決定）
-kimi --print --max-steps-per-turn 20 -w src/ -p "..."
-
-# 只拿最終結果（省 log 噪音，適合串接腳本）
-kimi --quiet -w src/ -p "..."
-
-# 需要讀額外目錄但不改（如讀 types/ 參考但只改 src/）
-kimi --print -w src/ --add-dir types/ -p "..."
-```
-
-**防護 SDD 檔案**（L069）：派工前先 `git add openspec/ .claude/ && git commit`；`-w` 只指程式碼目錄；prompt 結尾加禁令；派工後 `git diff --stat` 檢查。
-
----
-
 ## Codex CLI 寫碼用法備忘
 
 ```bash
@@ -54,7 +31,7 @@ wait
 - 同一訊息用多個 Bash tool call 並行 dispatch `codex exec &`
 - 所有 Codex 任務完成後 Claude 統一 `git diff --stat` 驗收 → CR → commit
 
-**防護 SDD 檔案**：同 L069/L050 — 派工前先 `git add openspec/ .claude/ && git commit`；`-C` 只指程式碼目錄；prompt 結尾加「禁止動 openspec/、.claude/、docs/」。
+**防護 SDD 檔案**（L050）：派工前先 `git add openspec/ .claude/ && git commit`；`-C` 只指程式碼目錄；prompt 結尾加「禁止動 openspec/、.claude/、docs/」。
 
 ---
 
@@ -62,15 +39,13 @@ wait
 
 ### Layer 1 — CR 並行矩陣
 
-**同一訊息並行派 3 個 subagent**（每個戴不同濾鏡全讀 diff）：
+**同一訊息並行派 3 個 Sonnet 子代理**（每個戴不同濾鏡全讀 diff）：
 
 - `correctness-auditor` — 只看邏輯錯誤、邊界條件、型別誤用
 - `security-lens` — 只看 OWASP / 注入 / 權限 / WP nonce
 - `performance-auditor` — 只看 N+1 / 迴圈 IO / 記憶體 / 缺快取
 
-三份報告回來後主對話整合，派 Copilot 一次修。
-
-**備用**：跨檔（3+ 檔案）改用 Kimi CLI `kimi -p --print -w <dir>`
+三份報告回來後主對話整合，派 Sonnet 子代理一次修。
 
 ### Layer 2 — Debug
 
@@ -84,7 +59,7 @@ wait
 - 觸發：每個 Phase 完成後
 - 工作：確認新增的函數都有對應測試，執行 `npx jest --coverage` 或 `composer test`
 - 標準：核心業務邏輯覆蓋率 > 80%
-- 派給：Copilot CLI 跑 `--coverage`
+- 派給：Sonnet 子代理或 Codex CLI
 
 ---
 
@@ -110,7 +85,7 @@ wait
 | 改了檔案但 build/test 失敗 | `git restore .` → 換下一個 |
 | CLI 超時（60 秒無輸出） | kill → 換下一個 |
 
-切換時一行告知：「⚠️ [Copilot] build 失敗，切換 [Kimi] 重做」。不解釋細節、不等確認。
+切換時一行告知：「⚠️ [Codex] build 失敗，切換 [Sonnet 子代理] 重做」。不解釋細節、不等確認。
 
 ---
 
@@ -121,7 +96,7 @@ wait
 | 審查 | ✅ | 同檔多濾鏡（correctness / security-lens / performance） |
 | 寫碼 | ⚠️ | 只有「不同檔案」才並行（同檔會打架） |
 | 研究 | ⚠️ | 只有「不同主題」才並行（同主題合併一次問） |
-| 設計 | ❌ | 單一 Copilot 或 Sonnet 子代理（一致性優先） |
+| 設計 | ❌ | 單一 Sonnet 子代理（一致性優先） |
 | 搜檔 | ❌ | 單一 Explore 或 Grep（並行無意義） |
 
 原則：**任務之間無交互依賴 → 才並行**。

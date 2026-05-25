@@ -50,7 +50,7 @@ claude-config/
 | `rules/routing.md` | Model routing — who does what |
 | `rules/triggers.md` | Auto-trigger rules |
 | `rules/ssot.md` | Single Source of Truth table |
-| `rules/dev-pipeline.md` | Phase flow definitions |
+| `rules/opcos-dev-guide.md` | opcOS 子服務開發指南 |
 | `rules/mesh-flow.md` | Task execution and failure recovery |
 | `rules/formatter.md` | Format check specs |
 | `soul.md` | Persona and behavioral guidelines |
