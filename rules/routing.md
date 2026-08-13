@@ -44,6 +44,29 @@
 
 Codex CLI 例外：批次執行者角色，由 CC 派任，見 `~/.codex/AGENTS.md`。其他 CLI：Fish 明確點名才用。
 
+## 自訂全域 Agent 命名對照表（2026-08-13 起中文角色名）
+
+> SSOT：全域 agent 定義唯一放 `~/.claude/agents/*.md`（frontmatter `name:` 欄位＝檔名＝呼叫用的 subagent_type）。這裡只列速查表，改名/加新 agent 時同步更新這裡。
+
+| 中文名 | 原英文名 | 用途 | 正式規格（若非全域檔） |
+|---|---|---|---|
+| 後端工程師 | backend-specialist | API、伺服器邏輯、資料庫串接、auth | — |
+| 前端工程師 | frontend-specialist | React/Next.js、UI 元件、樣式、狀態管理 | — |
+| 資料庫工程師 | database-architect | Schema 設計、migration、查詢優化 | — |
+| debug師 | debugger | 抓 bug、crash、效能問題根因分析 | — |
+| 測試師 | test-engineer | 寫測試、TDD、補覆蓋率 | — |
+| 資安稽核師 | security-auditor | 資安稽核、OWASP、注入/加密檢查 | — |
+| 文件師 | documentation-writer | README/API文件/changelog（僅明確要求才叫） | — |
+| 專案規劃師 | project-planner | 新專案/大功能拆任務、分工圖 | — |
+| 簡報師 | presentation-manager | 簡報：想法/文案整理成中繼稿→Kimi 提詞或 ppt-master pptx | `/Users/fishtv/Development/PM專案師/.claude/agents/簡報師.md` |
+| 開課師 | course-builder | 開課六階段：討論→定位收斂→簡報大綱（委派簡報師）→內容→出檔 | `/Users/fishtv/Development/PM專案師/.claude/agents/開課師.md` |
+| 課程社群架構師 | （純中文新建，無舊英文名） | 課程/社群學習系統設計：Discovery→六維度逐題確認（分級/自評/任務過關/分組/角色/共編工具）→收斂成正式 Spectra SR，止步於 SR，不寫程式碼 | `~/.claude/agents/課程社群架構師.md` |
+| 網頁設計師 | （純中文新建，無舊英文名） | 網頁企劃+部署：從想法/SR 討論需求→抓風格（21st.dev/motionsites.ai/Pinterest，3D 捲動效果走 scroll-world skill）→產出 HTML mockup 確認→靜態網站自己部署，或 App 需求交接前端工程師；也可直接吃已寫好的 HTML 跳過討論直接部署。預設直接 public 部署，使用者當次請求明確要求才走 private | `~/.claude/agents/網頁設計師.md` |
+
+呼叫：`Agent(subagent_type="簡報師")`。「課程社群架構師」「網頁設計師」為銜接關係：架構師產出 SR 後交棒給網頁設計師，網頁設計師自己涵蓋討論→mockup→部署（或判定為 App 再轉交前端工程師）。
+
+不在此表的舊 spec pipeline agent（product-planner、spec-initializer、spec-shaper、spec-verifier、spec-writer、task-list-creator、implementer、implementation-verifier、codex-development-worker，位於 `~/.claude/agents/agent-os/`）刻意不改名，Fish 確認過沒在用。
+
 ## 工作流層級
 
 ```
