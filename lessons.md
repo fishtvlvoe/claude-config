@@ -13,7 +13,7 @@
 
 | # | 規則 | 觸發情境 |
 |---|------|---------|
-| L016 | 說「X 不能用」前必須先 `which X` 確認。已知可用：codex（Codex CLI）。已停用（2026-05-24）：copilot/gemini/cursor/kimi CLI | 工具可用性 |
+| L016 | 說「X 不能用」前先 `which X` 確認，不要用產品名猜指令名（Antigravity 指令是 `agy` 不是 `antigravity`）。可用 CLI 清單/細節 → `~/.claude/reference/lessons-postmortems.md#L016` | 工具可用性 |
 | L018 | 遇阻靜默試 B/C/D，全部失敗才回報，禁止中途打斷用戶 | 工具失敗 |
 | L020 | 不確定的事自己查完再說話，禁止叫用戶「試試看」代勞驗證 | Debug |
 | L021 | Bug 流程：蒐集線索→列原因→工具逐一排除→確定根因→一次修復→自驗→才告知 | Debug |
@@ -24,7 +24,8 @@
 | L035 | 建 repo 後第一件事：.gitignore、LICENSE、README；依賴管理檔 MUST 固定版本，不要先寫內容再補基礎設施 | 專案初始化 |
 | L036 | 加任何平台設定前先確認目標平台版本和限制（如 GitHub Pages 用 Jekyll 3.10 不是 Jekyll 4），不確定就查官方文件 | 平台版本確認 |
 | L039 | 每個階段完成後，MUST 主動告知下一步是什麼、需要用戶做什麼決定，不能做完就停在那裡等問。格式：「下一步是 X，需要你 Y，我的判斷是 Z，你要繼續嗎？」 | 任何任務完成後 |
-| L041 | 禁止叫 Fish 開瀏覽器操作任何事情。瀏覽器操作一律用 agent-browser MCP 或 gh CLI 自己完成。唯一例外：需要 Fish 親自授權的事（貼 API Key、2FA、付費操作、手動 Webhook 授權）。違反 = 白工。 | 任何需要瀏覽器的操作 |
+| L041 | 禁止叫 Fish 開瀏覽器操作任何事情。瀏覽器操作優先用 **ego-browser skill**（`/ego-browser`，CLI 可控真實 Chrome，含登入態）；ego-browser 不可用才退回 claude-in-chrome MCP 或 gh CLI。唯一例外：需要 Fish 親自授權的事（貼 API Key、2FA、付費操作、手動 Webhook 授權）。違反 = 白工。 | 任何需要瀏覽器的操作 |
+| L095 | 查任何服務（Zeabur、Cloudflare、GitHub App 等）的 API Key/Token 前，先查該專案根目錄的 `.env`、`.env.local`（優先），沒有才問 Fish（L090 具體化：CLI 查不到時，改用 ego-browser 開 Dashboard 視覺確認，不要卡在 API 閘道問題上重試） | 需要外部服務憑證或要驗證雲端資源實際狀態時 |
 | L077 | **程式碼風格衝突時必須明說選哪一種**，不要「兩邊都用、混在一起」。觸發：同個 codebase 看到兩種風格（例：camelCase vs snake_case、tab vs space、early-return vs nested-if）→ 必須先看哪種佔多數或先看 .editorconfig/prettier 設定，跟著佔多數的走；無法決定時直接問用戶「A 還是 B？」。禁止：「為了相容性兩個都保留」、「這檔案用 A 那檔案用 B」式的悄悄混用。 | 任何寫碼任務開始前 |
 | L080 | Fish 說「sr」= Spectra SDD 專案（sr = spectra 的縮寫） | 任何對話 |
 | L081 | **驗證 = 實際跑出結果，不是 build 通過**。任何功能完成後 MUST 自己做行為驗證：(1) 寫腳本用假資料呼叫函式 → 產出實際檔案（PDF/JSON/圖片）存 `/tmp/`；(2) 或啟動 dev server → Chrome MCP 操作 UI → 截圖每個畫面；(3) 或 curl/fetch 打 API 確認回傳格式正確。**build 通過 ≠ 功能正確**。禁止只跑 build 就回報「完成」；禁止說「需要你自己跑一次確認」把驗證丟回 Fish。違反 = 白工 + 信任歸零。 | 任何功能完成回報前 |
@@ -32,6 +33,12 @@
 | L085 | **完整派工 + 自己驗收（不丟球給 Fish，無例外）**。派工時：prompt 必須附 `ui-reference/` 路徑 + spec 路徑 + HTML demo 路徑，明確寫「按照這三份文件實作，不可自由發揮」。測試時：自己用 Chrome MCP 跑完所有頁面 + 讀 console + 截圖，一次跑完、一次報告全部問題 + 建議解法。對話中：重要資訊立刻寫進 spec/design.md，不靠對話記憶。**禁止**：叫 Fish 開瀏覽器/截圖/貼報錯、問 Fish 已回答過的問題。 | 派工/測試/對話中 |
 | L090 | **API key / token / endpoint 先查 `.env`，禁止問 Fish**。任何「這個 API 的 key 是什麼？」「你有這個服務的 token 嗎？」問題，MUST 先 `cat .env`（或 `cat .env.local`、`cat .env.production`）自己找答案。找不到才問，且問的時候說明「已查 .env，沒有 X」。這是 L020 的具體化。 | 需要外部 API key 時 |
 | L091 | **開口前先反思：我能自己做嗎？（2026-05-19）** 想問 Fish 任何問題前 MUST 先問自己「我有工具能找到這個答案嗎？」Chrome MCP 能看頁面/DOM/console/network；Bash/grep 能查檔案；gh 能查 GitHub。有工具能做 → 不開口。才開口時說明「已查 [工具]，找不到 [原因]」。**禁止詞**：「請截圖給我」「請你手動試試看」「請告訴我選單/頁面/畫面」「你那邊看到什麼」。違反 = 停止重來。起因：叫 Fish 截圖而非自己用 Chrome MCP。 | 任何開口問 Fish 前 |
+| L092 | **寫作 Prompt 自動套用，不等 Fish 提醒（2026-06-29）** 產出標題/金句/副標題/收尾/TA分析時，MUST 自動讀對應 Prompt 檔並套用框架，禁止等 Fish 丟提示詞才做。違反=Fish必須重複提醒=白工。起因：每次構思金句都要Fish提醒才用句式替換框架。 | 任何寫作產出前 |
+| L093 | **討論中一題一題等確認才走下一步（2026-06-29）** 任何創作流程中，每個決策點（標題/金句/結構/收尾）提出後，MUST 等用戶明確說「好」「可以」「就這個」才進下一步。用戶沒說要哪個 → 閉嘴等。禁止：用戶還在思考時自動讀下一個 Prompt、產出候選、或進下一 Phase。違反 = 強迫用戶重新想一遍 = 白工。起因：用戶還沒確認標題，我就跳去讀標題框架產候選。 | 任何討論/創作過程中 |
+| L094 | **禁止使用破折號（——），無例外（2026-06-29）** 此規則已在 `social-post/SKILL.md` 寫作限制中，但反覆被違反（Fish 提醒 3 次以上）。寫作任何正文、標題、副標題、金句時，MUST 在輸出前 grep 自己的草稿確認無 `——`。替代方案：頓號（、）/ 句號（。）/ 換行 / 冒號（：）/ 逗號（，）。violations = 破壞信任，已被升級至 lessons.md 強制層。起因：每次寫 AI 課文章都出現破折號，Fish 已糾正 3+ 次。 | 任何寫作產出前（尤其 social-post） |
+| L096 | **派工外部 CLI 一律用 orca-cli 開真正互動 terminal session，禁止背景一次性 headless 呼叫**（`codex exec`/`kimi -p` 冒充派工）。`--command` 禁止填 `claude`——等於自己分身寫代碼，不是外部交叉驗證。開 terminal 後讀一次 preview 確認不是 `claude`。細節/起因 → `~/.claude/reference/lessons-postmortems.md#L096` | 任何「派 Codex/Kimi/Cursor/Antigravity 做 X」情境 |
+| L098 | **orca worktree 派工監督完整 SOP**（一次踩齊全部坑）。動工前必讀 → `~/.claude/reference/orca-worktree-sop.md`。五條速記：①先判斷要不要委派派工師（要不要脫離 PM context）②收編進 orchestration 監督用 `worker-start`，不要用 `terminal wait --for tui-idle`（誤判閒置）③送指令前用 `ps`+`lsof` 確認 handle 真的接對 CLI ④驗收只在產生層做一次，逐層只傳壓縮結論 ⑤超過 timeout 先查底層是否還在動，不代表失敗 | 派工任何多批次/長時間任務、或設計驗收流程時 |
+| L097 | **Fish 說「重做比較快」時，預設信他，不要用「先分析看看」擋下來**——這是強訊號，先問「重做範圍」不要問「要不要重做」。案例 → `~/.claude/reference/lessons-postmortems.md#L097` | 使用者質疑成果「不是我要的」且主動提「重做比較快」時 |
 
 ## 變更歷程
 
@@ -46,3 +53,6 @@
   - L019 / L045 / L046 / L082 → `lessons-frontend.md`
   - L049 / L050 / L053 / L069 / L075 / L076 / L078 → `lessons-dev.md`（新建）
   - L083 / L086 → `lessons-products.md`
+- 2026-06-29: 新增 L092 寫作 Prompt 自動套用、L093 一題一題等確認、L094 禁止破折號（Fish 糾正 3+ 次）
+- 2026-08-17: 新增 L096 派工外部 CLI 禁止背景 headless 呼叫（routing.md 已寫過但重複違反，升級進核心層）
+- 2026-08-19: Token 瘦身。L016/L096/L097/L098 案例全文搬到 `reference/lessons-postmortems.md`，routing.md 的 orca worktree 操作細節搬到 `reference/orca-worktree-sop.md`，兩檔都不用 `@` 引入，動工前才 Read
