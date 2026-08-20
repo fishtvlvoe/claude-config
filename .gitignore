@@ -49,7 +49,10 @@ claude-memory/
 commands/
 scripts/*
 !scripts/spectra-archive-guard.sh
-hooks/
+!scripts/hooks
+scripts/hooks/*
+!scripts/hooks/session-start.js
+hooks/*
 memory/
 package.json
 .DS_Store
