@@ -135,6 +135,8 @@ If the `preflight` field is absent (blocked or all_done states), skip this step.
    - **spec-driven**: proposal, specs, design, tasks
    - Other schemas: follow the contextFiles from CLI output
 
+   Also read `~/.claude/reference/spectra-local-ci-cd.md` and the change's `## Local CI / Cloud CD` section. Treat that section as an apply contract: run the declared local checks before marking implementation tasks complete, and run the declared behavior/cloud checks when the change scope requires them.
+
 5. **Check project preferences**
 
    Read `.spectra.yaml` in the project root.
@@ -171,6 +173,7 @@ If the `preflight` field is absent (blocked or all_done states), skip this step.
      2. **Quality** — derive values from existing state instead of duplicating; use existing types and constants over new literals
      3. **Efficiency** — parallelize independent async operations; avoid unnecessary awaits; match operation scope to actual need
      4. **No Placeholders in artifacts** — if the design or spec for this task contains placeholder language (TBD, TODO, "add appropriate handling"), pause and fix the artifact first or flag to the user. Do not implement against vague requirements.
+     5. **Delivery boundary** — local scripts may run CI checks but must not deploy; deployment belongs in the declared cloud workflow. CI/CD secrets must come from platform Secrets or environment variables.
    - Make the code changes required
    - Keep changes minimal and focused
    - Mark task complete in the tasks file: `- [ ]` → `- [x]`
@@ -208,6 +211,8 @@ If the `preflight` field is absent (blocked or all_done states), skip this step.
    ```
 
    Confirm `state: "all_done"`. If not, review remaining tasks and complete them.
+
+   Before reporting completion, verify the delivery contract tasks have evidence. Build-only or checkbox-only results are insufficient; deployment-related changes also require a live URL/API readback.
 
 9. **On completion or pause, show status**
 
