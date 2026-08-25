@@ -96,6 +96,8 @@ This tool uses conversation context to update artifacts (no plan file directory)
 
    Read existing artifacts for context before updating.
 
+   Before updating artifacts, read `~/.claude/reference/spectra-local-ci-cd.md` and re-check the target repository's local hooks, CI commands, cloud workflow, deploy target, trigger, and secret source. Keep existing delivery evidence, and add missing gates to the change instead of waiting for a separate reminder.
+
 5. **Update artifacts**
 
    For each artifact, get instructions first:
@@ -127,6 +129,12 @@ This tool uses conversation context to update artifacts (no plan file directory)
    | Discussed approach   | proposal: What   | Summarize agreed approach          |
    | Mentioned files      | proposal: Impact | Affected code list                 |
    | Discussion phases    | tasks.md groups  | One topic = one `##` heading       |
+
+   **Delivery Contract Mapping**:
+
+   - `proposal.md` Impact records affected local and cloud delivery surfaces, or `N/A` plus reason.
+   - `design.md` contains the complete `## Local CI / Cloud CD` contract with real commands and paths.
+   - `tasks.md` contains red-test, local-gate, behavior-validation, and applicable cloud-gate tasks; preserve completed tasks and only check new tasks after evidence exists.
 
    **When updating an existing change:**
    - Merge new context into existing proposal (don't replace)
@@ -178,6 +186,11 @@ This tool uses conversation context to update artifacts (no plan file directory)
    - Are all completed tasks `[x]` still present and unchanged?
    - Were existing `[P]` markers preserved on tasks that still qualify?
    - Was existing content merged (not replaced)?
+
+   **Check 6: Delivery Contract Check**
+   - Local scripts contain no deployment commands.
+   - CI/CD secrets use platform Secrets or environment variables, never hardcoded values.
+   - Missing hooks, tests, or cloud gates are explicit tasks or justified `N/A`.
 
 ---
 

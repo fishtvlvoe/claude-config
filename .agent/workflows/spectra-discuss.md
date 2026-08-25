@@ -183,6 +183,17 @@ The goal is thoroughness, not interrogation. One nudge maximum.
 
 You have full context of the Spectra system. Use it naturally.
 
+### Delivery contract awareness
+
+For every development idea, automatically inspect and discuss the Local CI / Cloud CD boundary using `~/.claude/reference/spectra-local-ci-cd.md`:
+
+- identify local hooks and the commands that must pass before commit;
+- identify cloud integration checks, deploy target, trigger, and Secrets source;
+- flag missing hooks or gates as explicit follow-up work;
+- reject local deployment commands and hardcoded CI/CD secrets.
+
+When the discussion is captured into `design.md` or `tasks.md`, include the delivery contract and its verification tasks. The user does not need to restate this requirement.
+
 ### Check for context
 
 At the start, quickly check what exists:

@@ -76,6 +76,14 @@ If no argument is provided, the workflow will extract requirements from conversa
 
    If a change with that name already exists, suggest continuing the existing change instead of creating a new one.
 
+4b. **Load the delivery contract (MANDATORY)**
+
+   Read `~/.claude/reference/spectra-local-ci-cd.md` before writing any artifact.
+
+   Inspect the target repository and record its repo root, branch, package manager, test/lint/format entry points, local hooks, CI workflows, deployment target, trigger, and secret source. Do not assume hooks or CI exist. If a gate is missing, classify it as a task or explicitly record `N/A` with a reason.
+
+   The local/cloud boundary is fixed: local scripts may run CI checks but must never deploy; cloud workflows own integration checks and deployment.
+
 5. **Write the proposal**
 
    Get instructions:
@@ -85,6 +93,8 @@ If no argument is provided, the workflow will extract requirements from conversa
    ```
 
    Write the proposal file using the template from instructions, with the following format based on change type:
+
+   In every proposal's `Impact` section, include the affected local hooks/CI and cloud CI/CD/deployment surfaces. For each unaffected surface, write `N/A` with the reason. Do not leave delivery behavior implicit.
 
    ### Feature
 
@@ -216,6 +226,10 @@ If no argument is provided, the workflow will extract requirements from conversa
    - Use **AskUserQuestion tool** to clarify
    - Then continue with creation
 
+   When writing `design.md`, add the complete `## Local CI / Cloud CD` section from `~/.claude/reference/spectra-local-ci-cd.md`, filled with real repository commands and paths.
+
+   When writing `tasks.md`, add explicit red-test, local-gate, behavior-validation, and applicable cloud-gate tasks. A task may be checked only after its command or procedure produced evidence.
+
 8. **Inline Self-Review** (before CLI analysis)
 
    After creating all artifacts, scan them manually. Fix issues inline, then proceed to the CLI analyzer.
@@ -245,6 +259,12 @@ If no argument is provided, the workflow will extract requirements from conversa
    - Are success/failure conditions testable and specific?
    - Are boundary conditions defined (empty input, max limits, error cases)?
    - Could "the system" refer to multiple components? Be explicit.
+
+   **Check 5: Delivery Contract Check**
+   - Does `design.md` contain real local hook/check commands and cloud workflow/deploy/secret boundaries?
+   - Does `tasks.md` contain red-test, local-gate, behavior-validation, and applicable cloud-gate work?
+   - Is any local deployment command present? If yes, stop and fix the artifacts.
+   - Are CI/CD secrets referenced through environment variables or platform Secrets only?
 
 ---
 
